@@ -1,0 +1,86 @@
+.category-subcategories {
+    padding: 40px 20px;
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+  
+  .category-subcategories h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .subcategories-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  
+  .subcategory-column {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .subcategory-group {
+    margin-bottom: 30px;
+  }
+  
+  .subcategory-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    text-decoration: none; /* Прибираємо підкреслення */
+    display: block; /* Для коректного відображення як блоку */
+    transition: color 0.2s; /* Плавна зміна кольору при наведенні */
+  }
+  
+  .subcategory-title:hover {
+    color: #0288d1; /* Синій при наведенні */
+  }
+  
+  .subcategory-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .subcategory-list li {
+    margin-bottom: 10px;
+  }
+  
+  .subcategory-link {
+    font-size: 16px;
+    font-weight: 400;
+    color: #555;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .subcategory-link:hover {
+    color: #0288d1;
+  }
+  
+  @media (max-width: 768px) {
+    .subcategories-container {
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .subcategory-column {
+      min-width: 100%;
+    }
+  
+    .category-subcategories h1 {
+      font-size: 24px;
+    }
+  
+    .subcategory-title {
+      font-size: 18px;
+    }
+  
+    .subcategory-link {
+      font-size: 14px;
+    }
+  }

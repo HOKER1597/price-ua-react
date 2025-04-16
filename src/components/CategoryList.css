@@ -1,0 +1,294 @@
+.category-list {
+  padding: 20px;
+}
+
+/* Навігація груп */
+.category-groups {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 20px;
+}
+
+.category-group {
+  position: relative;
+}
+
+.group-name {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.2s;
+}
+
+.group-name:hover {
+  color: #0288d1; /* Синій при наведенні */
+}
+
+.dropdown {
+  display: block; /* Завжди присутній, але прихований */
+  visibility: hidden; /* Приховуємо для анімації */
+  position: fixed; /* Фіксуємо відносно сторінки */
+  margin-top: 20px;
+  left: 0; /* З самого лівого краю */
+  background-color: white;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15); /* Тінь знизу */
+  border-radius: 0 0 6px 6px; /* Закруглення знизу */
+  width: 1920px; /* Фіксована ширина */
+  z-index: 1000; /* Поверх слайдера */
+  opacity: 0;
+  transform: translateY(10px); /* Зміщення для анімації */
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease; /* Плавна анімація */
+}
+
+.category-group:hover .dropdown {
+  visibility: visible; /* Показуємо */
+  opacity: 1;
+  transform: translateY(0); /* Повернення в позицію */
+}
+
+/* Ховаємо неактивні dropdown */
+.category-groups .dropdown {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.category-group:hover .dropdown {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown-row {
+  display: flex;
+  justify-content: space-between; /* Розподіляємо рівномірно */
+  flex-wrap: nowrap; /* Без перенесення */
+  max-width: 1200px; /* Обмеження контенту */
+  margin-left: 0; /* Без відступу зліва */
+  padding-left: 0; /* Без внутрішнього відступу */
+}
+
+.dropdown-item {
+  width: 200px;
+  display: flex;
+  margin-left: 40px;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+  font-size: 13px;
+  transition: background-color 0.2s, color 0.2s;
+  flex: 1; /* Рівна ширина для всіх елементів */
+  min-width: 80px; /* Мінімальна ширина */
+}
+
+.dropdown-item:hover {
+  background-color: #f0faff;
+  color: #0288d1;
+}
+
+.icon-wrapper {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 5px;
+}
+
+.icon-wrapper svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Категорії (слайдер) */
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 8px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #333;
+  width: 180px;
+  height: 200px;
+  margin: 10px auto;
+}
+
+.category-image-wrapper {
+  width: 180px;
+  height: 150px;
+  overflow: hidden;
+  position: relative;
+}
+
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.1); /* Наближення зображення */
+  filter: brightness(70%); /* Затемнення */
+}
+
+.category-card h3 {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+/* Слайдер */
+.slick-slider {
+  position: relative;
+}
+
+.slick-list {
+  overflow: hidden;
+}
+
+.slick-track {
+  display: flex;
+}
+
+.slick-slide > div {
+  display: flex;
+  justify-content: center;
+}
+
+/* Стрілки */
+.custom-arrow {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #40c4ff; /* Блакитний фон */
+  border-radius: 50%; /* Кругла форма */
+  z-index: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  transform-origin: center center; /* Масштабування від центру */
+  position: absolute; /* Фіксуємо позицію */
+}
+
+.custom-arrow:hover {
+  background-color: #0288d1; /* Синій при наведенні */
+  transform: scale(1.1); /* Збільшення у всі сторони */
+}
+
+.round-arrow::before {
+  display: none; /* Прибираємо стандартні стрілки slick */
+}
+
+.next-arrow {
+  right: -50px;
+  top: 50%; /* Центруємо вертикально */
+  transform: translateY(-50%); /* Вирівнювання без зміщення */
+}
+
+.prev-arrow {
+  left: -50px;
+  top: 50%; /* Центруємо вертикально */
+  transform: translateY(-50%); /* Вирівнювання без зміщення */
+}
+
+.custom-arrow:hover {
+  transform: translateY(-50%) scale(1.1); /* Зберігаємо вирівнювання при масштабуванні */
+}
+
+/* Точки */
+.slick-dots {
+  bottom: -30px;
+}
+
+.slick-dots li {
+  margin: 0 5px;
+}
+
+.slick-dots li button:before {
+  font-size: 12px;
+  color: #999; /* Сірий для неактивних точок */
+  opacity: 1;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #0288d1; /* Синій для активної точки */
+}
+
+@media (max-width: 768px) {
+  .next-arrow {
+    right: 10px;
+  }
+
+  .prev-arrow {
+    left: 10px;
+  }
+
+  .custom-arrow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .custom-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .category-groups {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .dropdown {
+    position: absolute; /* На мобільних повертаємо absolute */
+    width: 100vw; /* На всю ширину */
+    top: 100%; /* Під категоріями */
+    left: 0;
+  }
+
+  .dropdown-row {
+    flex-wrap: wrap; /* Дозволяємо перенос на мобільних */
+    justify-content: space-around;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .dropdown-item {
+    min-width: 70px;
+    padding: 5px;
+  }
+
+  .category-card {
+    width: 140px;
+    height: 180px;
+  }
+
+  .category-image-wrapper {
+    width: 140px;
+    height: 120px;
+  }
+
+  .category-image {
+    width: 100%;
+    height: 100%;
+  }
+
+  .category-card h3 {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 1921px) {
+  .dropdown {
+    left: 50%;
+    transform: translateX(-50%); /* Центруємо для ширших екранів */
+  }
+}
