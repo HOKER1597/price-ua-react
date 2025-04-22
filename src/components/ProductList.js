@@ -679,7 +679,7 @@ function ProductList({ searchTerm }) {
                 return (
                   <label
                     key={index}
-                    className={`${brand.length > 12 ? 'span-two-columns' : ''} ${isDisabled ? 'disabled' : ''}`}
+                    className={`${brand.length > 13 ? 'span-two-columns' : ''} ${isDisabled ? 'disabled' : ''}`}
                     ref={el => (filterRefs.current[`brands-${brand}`] = el)}
                   >
                     <input
@@ -853,7 +853,8 @@ function ProductList({ searchTerm }) {
         </div>
 
         {/* Products column */}
-        <div className="products">
+        <div className='products'>
+        <div className="products-list">
           {paginatedProducts.length > 0 ? (
             paginatedProducts.map((product, index) => (
               <Link
@@ -873,44 +874,47 @@ function ProductList({ searchTerm }) {
           ) : (
             <p>Товари не знайдено</p>
           )}
-        </div>
-      </div>
-
-      {/* Pagination and "Load More" button */}
+          </div>
+          {/* Pagination and "Load More" button */}
       {totalProducts > productsPerPage && (
-        <div className="pagination-container">
-          {((startPage - 1 + loadMorePages) * productsPerPage) < totalProducts && (
-            <button className="load-more-btn" onClick={handleLoadMore}>
-              Завантажити ще
-            </button>
-          )}
-          <div className="pagination">
-            <button
-              className="pagination-btn"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              Попередня
-            </button>
-            {pageNumbers.map((number) => (
-              <button
-                key={number}
-                className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
-                onClick={() => handlePageChange(number)}
-              >
-                {number}
-              </button>
-            ))}
-            <button
-              className="pagination-btn"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Наступна
-            </button>
+            <div className="pagination-container">
+              {((startPage - 1 + loadMorePages) * productsPerPage) < totalProducts && (
+                <button className="load-more-btn" onClick={handleLoadMore}>
+                  Завантажити ще
+                </button>
+              )}
+              <div className="pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Попередня
+                </button>
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
+                    onClick={() => handlePageChange(number)}
+                  >
+                    {number}
+                  </button>
+                ))}
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Наступна
+                </button>
           </div>
         </div>
       )}
+        </div>
+        
+      </div>
+
+      
     </div>
   );
 }
