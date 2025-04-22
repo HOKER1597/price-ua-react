@@ -679,7 +679,7 @@ function ProductList({ searchTerm }) {
                 return (
                   <label
                     key={index}
-                    className={`${brand.length > 16 ? 'span-two-columns' : ''} ${isDisabled ? 'disabled' : ''}`}
+                    className={`${brand.length > 12 ? 'span-two-columns' : ''} ${isDisabled ? 'disabled' : ''}`}
                     ref={el => (filterRefs.current[`brands-${brand}`] = el)}
                   >
                     <input
@@ -862,11 +862,11 @@ function ProductList({ searchTerm }) {
                 className="product-card"
               >
                 <h3>{getProductName(product)}</h3>
-                <p className="price">{product.price} грн</p>
                 <img
                   src={product.images && product.images.length > 0 ? product.images[0] : product.image}
                   alt={product.name}
                 />
+                <p className="price">{product.price} грн</p>
                 <p>{product.description}</p>
               </Link>
             ))

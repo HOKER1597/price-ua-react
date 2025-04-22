@@ -381,13 +381,7 @@ body {
 
 .recommended-original-price {
   font-size: 14px;
-  color: #ff6a00;
-}
-
-.recommended-discounted-price {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ff69b4; /* Pink color to match the example */
+  color: #000000;
 }
 
 .recommended-add-to-cart {

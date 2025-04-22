@@ -7,7 +7,7 @@ const subcategoriesData = {
   makeup: [
     {
       category: 'Очі',
-      categoryId: 'eyes', // Додаємо ID для категорії
+      categoryId: 'eyes',
       items: [
         { id: 'mascara', name: 'Туш для вій' },
         { id: 'eyeliner', name: 'Підводка для очей' },
@@ -139,6 +139,156 @@ const subcategoriesData = {
       ],
     },
   ],
+  body: [
+    {
+      category: 'Очищення',
+      categoryId: 'body-cleansing',
+      items: [
+        { id: 'shower-gel', name: 'Гель для душу' },
+        { id: 'body-scrub', name: 'Скраб для тіла' },
+        { id: 'bath-foam', name: 'Піна для ванни' },
+      ],
+    },
+    {
+      category: 'Зволоження та живлення',
+      categoryId: 'body-moisturizing',
+      items: [
+        { id: 'body-cream', name: 'Крем для тіла' },
+        { id: 'body-lotion', name: 'Лосьйон для тіла' },
+        { id: 'body-oil', name: 'Олія для тіла' },
+      ],
+    },
+    {
+      category: 'Догляд за руками та ногами',
+      categoryId: 'hands-feet',
+      items: [
+        { id: 'hand-cream', name: 'Крем для рук' },
+        { id: 'foot-cream', name: 'Крем для ніг' },
+        { id: 'cuticle-care', name: 'Догляд за кутикулою' },
+      ],
+    },
+    {
+      category: 'Спеціальний догляд',
+      categoryId: 'body-special-care',
+      items: [
+        { id: 'anti-cellulite', name: 'Антицелюлітні засоби' },
+        { id: 'deodorant', name: 'Дезодоранти' },
+        { id: 'sun-protection-body', name: 'Сонцезахисні засоби для тіла' },
+      ],
+    },
+  ],
+  dermocosmetics: [
+    {
+      category: 'Очищення шкіри',
+      categoryId: 'dermo-cleansing',
+      items: [
+        { id: 'dermo-cleansing-gel', name: 'Гель для вмивання' },
+        { id: 'dermo-micellar-water', name: 'Міцелярна вода' },
+        { id: 'dermo-cleansing-foam', name: 'Пінка для вмивання' },
+      ],
+    },
+    {
+      category: 'Догляд за проблемною шкірою',
+      categoryId: 'problem-skin',
+      items: [
+        { id: 'acne-treatment-dermo', name: 'Засоби від акне' },
+        { id: 'anti-redness', name: 'Засоби проти почервонінь' },
+        { id: 'sebum-control', name: 'Засоби для контролю себуму' },
+      ],
+    },
+    {
+      category: 'Зволоження та відновлення',
+      categoryId: 'dermo-moisturizing',
+      items: [
+        { id: 'dermo-moisturizer', name: 'Зволожувальний крем' },
+        { id: 'dermo-serum', name: 'Сироватка' },
+        { id: 'dermo-repair', name: 'Відновлювальний крем' },
+      ],
+    },
+    {
+      category: 'Сонцезахист',
+      categoryId: 'dermo-sun-protection',
+      items: [
+        { id: 'dermo-spf-cream', name: 'Сонцезахисний крем' },
+        { id: 'dermo-spf-spray', name: 'Сонцезахисний спрей' },
+      ],
+    },
+  ],
+  professional: [
+    {
+      category: 'Професійний догляд за обличчям',
+      categoryId: 'pro-face-care',
+      items: [
+        { id: 'pro-cleansing', name: 'Професійне очищення' },
+        { id: 'pro-peeling', name: 'Професійні пілінги' },
+        { id: 'pro-mask', name: 'Професійні маски' },
+      ],
+    },
+    {
+      category: 'Професійний догляд за волоссям',
+      categoryId: 'pro-hair-care',
+      items: [
+        { id: 'pro-shampoo', name: 'Професійний шампунь' },
+        { id: 'pro-conditioner', name: 'Професійний кондиціонер' },
+        { id: 'pro-hair-mask', name: 'Професійна маска для волосся' },
+      ],
+    },
+    {
+      category: 'Професійний макіяж',
+      categoryId: 'pro-makeup',
+      items: [
+        { id: 'pro-foundation', name: 'Професійний тональний крем' },
+        { id: 'pro-eyeshadow', name: 'Професійні тіні' },
+        { id: 'pro-lipstick', name: 'Професійна помада' },
+      ],
+    },
+    {
+      category: 'Інструменти та аксесуари',
+      categoryId: 'pro-tools',
+      items: [
+        { id: 'pro-brushes', name: 'Професійні пензлі' },
+        { id: 'pro-sponges', name: 'Професійні спонжі' },
+        { id: 'pro-lash-curlers', name: 'Щипці для вій' },
+      ],
+    },
+  ],
+  perfumery: [
+    {
+      category: 'Жіноча парфумерія',
+      categoryId: 'women-perfume',
+      items: [
+        { id: 'women-eau-de-parfum', name: 'Парфумована вода' },
+        { id: 'women-eau-de-toilette', name: 'Туалетна вода' },
+        { id: 'women-perfume-mist', name: 'Парфумований спрей' },
+      ],
+    },
+    {
+      category: 'Чоловіча парфумерія',
+      categoryId: 'men-perfume',
+      items: [
+        { id: 'men-eau-de-parfum', name: 'Парфумована вода' },
+        { id: 'men-eau-de-toilette', name: 'Туалетна вода' },
+        { id: 'men-aftershave', name: 'Лосьйон після гоління' },
+      ],
+    },
+    {
+      category: 'Унісекс парфумерія',
+      categoryId: 'unisex-perfume',
+      items: [
+        { id: 'unisex-eau-de-parfum', name: 'Парфумована вода' },
+        { id: 'unisex-eau-de-toilette', name: 'Туалетна вода' },
+      ],
+    },
+    {
+      category: 'Аромати для дому',
+      categoryId: 'home-fragrance',
+      items: [
+        { id: 'diffuser', name: 'Аромадифузори' },
+        { id: 'scented-candles', name: 'Ароматичні свічки' },
+        { id: 'room-spray', name: 'Спрей для приміщення' },
+      ],
+    },
+  ],
 };
 
 function CategorySubcategories() {
@@ -154,7 +304,13 @@ function CategorySubcategories() {
   return (
     <div className="category-subcategories">
       <h1>
-        {groupId === 'makeup' ? 'Макіяж' : groupId === 'face' ? 'Догляд за обличчям' : 'Догляд за волоссям'}
+        {groupId === 'makeup' ? 'Макіяж' :
+         groupId === 'face' ? 'Догляд за обличчям' :
+         groupId === 'hair' ? 'Догляд за волоссям' :
+         groupId === 'body' ? 'Догляд за тілом' :
+         groupId === 'dermocosmetics' ? 'Дерматокосметика' :
+         groupId === 'professional' ? 'Професійна косметика' :
+         groupId === 'perfumery' ? 'Парфумерія' : 'Категорія'}
       </h1>
       <div className="subcategories-container">
         {columns.map((column, colIndex) => (
@@ -170,15 +326,15 @@ function CategorySubcategories() {
                 <ul className="subcategory-list">
                   {subcategory.items.map(item => (
                     <li key={item.id}>
-                    <Link
-                      to={`/category/${subcategory.categoryId}${item.type ? `?type=${encodeURIComponent(item.type)}` : ''}`}
-                      className="subcategory-link"
-                    >
-                      {item.name}
-                    </Link>
+                      <Link
+                        to={`/category/${subcategory.categoryId}${item.type ? `?type=${encodeURIComponent(item.type)}` : ''}`}
+                        className="subcategory-link"
+                      >
+                        {item.name}
+                      </Link>
                     </li>
-                    ))}
-                  </ul>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
