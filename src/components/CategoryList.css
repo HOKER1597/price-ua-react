@@ -275,6 +275,8 @@ body {
   flex: 1;
   max-width: 250px; /* Match hero carousel width */
   margin-left: auto;
+  display: flex;
+  flex-direction: column; /* Ensure vertical stacking */
 }
 
 .recommended-header {
@@ -292,7 +294,7 @@ body {
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 0 0 8px 8px; /* Adjust border-radius to account for header */
+  flex: 1; /* Allow the wrapper to take available space */
 }
 
 .recommended-inner {
@@ -403,9 +405,13 @@ body {
   background-color: #364c75; /* Slightly darker peach on hover */
 }
 
-.recommended-dots {
+.recommended-dots  {
   display: flex;
   gap: 8px;
   justify-content: center;
   padding: 10px 0;
+  background-color: #fff; /* Match the slide background */
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  z-index: 100;
 }
