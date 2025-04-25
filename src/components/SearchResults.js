@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './SearchResults.css';
 
-function SearchResults({ results, onClose }) {
+function SearchResults({ results, searchQuery, onClose }) {
   const categoryNames = {
     shampoos: 'Шампуні',
     facecream: 'Креми для обличчя',
@@ -64,7 +64,7 @@ function SearchResults({ results, onClose }) {
       {results.slice(0, 2).map((category, index) => (
         <div key={index} className="search-category">
           <Link
-            to={`/category/${category.category}?search=${encodeURIComponent(results[0].products[0].name)}`}
+            to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
             className="category-title"
             onClick={onClose}
           >
@@ -85,7 +85,7 @@ function SearchResults({ results, onClose }) {
           </ul>
           {category.products.length > 5 && (
             <Link
-              to={`/category/${category.category}?search=${encodeURIComponent(results[0].products[0].name)}`}
+              to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
               className="more-products"
               onClick={onClose}
             >
@@ -96,7 +96,7 @@ function SearchResults({ results, onClose }) {
       ))}
       {results.length > 2 && (
         <Link
-          to={`/search?query=${encodeURIComponent(results[0].products[0].name)}`}
+          to={`/search?query=${encodeURIComponent(searchQuery)}`}
           className="view-all"
           onClick={onClose}
         >

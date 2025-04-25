@@ -29,9 +29,23 @@
 
 .search-input {
   padding: 10px;
-  width: 350px;
+  width: 460px;
   border: none;
   border-radius: 5px;
+}
+
+.clear-icon {
+  position: absolute;
+  right: 120px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.clear-icon:hover {
+  stroke: #0288d1;
 }
 
 .search-button {

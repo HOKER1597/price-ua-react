@@ -50,6 +50,12 @@ function Header({ setSearchTerm }) {
     }
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSearchResults([]);
+    setShowResults(false);
+  };
+
   const handleCloseResults = () => {
     setShowResults(false);
   };
@@ -68,38 +74,62 @@ function Header({ setSearchTerm }) {
           CosmetickUA
         </Link>
         <div className="search-container">
-          <input
-            type="text"
-            placeholder="Пошук товарів..."
-            value={searchQuery}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            className="search-input"
-          />
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              placeholder="Пошук товарів..."
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              className="search-input"
+            />
+            {searchQuery && (
+              <svg
+                className="clear-icon"
+                onClick={handleClearSearch}
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#555"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            )}
+          </div>
           <button onClick={handleSearch} className="search-button">
             Знайти
           </button>
           {showResults && searchResults.length > 0 && (
-            <SearchResults results={searchResults} onClose={handleCloseResults} />
+            <SearchResults
+              results={searchResults}
+              searchQuery={searchQuery}
+              onClose={handleCloseResults}
+            />
           )}
         </div>
         <div className="profile">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span>Увійти</span>
-      </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Увійти</span>
+        </div>
       </div>
     </header>
   );

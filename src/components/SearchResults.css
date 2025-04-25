@@ -72,11 +72,3 @@
 .view-all:hover {
   text-decoration: underline;
 }
-
-/* Адаптивність для мобільних */
-@media (max-width: 768px) {
-  .search-results {
-    width: 100%;
-    left: 0;
-  }
-}
