@@ -15,6 +15,16 @@ import news8 from '../img/news8.avif';
 import news9 from '../img/news9.avif';
 import news10 from '../img/news10.avif';
 
+// Company logos
+import evaLogo from '../img/logo_eva.svg';
+import prostorLogo from '../img/logo_prostor.png';
+import watsonsLogo from '../img/logo_watsons.jpg';
+import rozetkaLogo from '../img/logo_rozetka.png';
+import makeupLogo from '../img/logo_makeup.png';
+import parfumsLogo from '../img/logo_parfums.png';
+import auchanLogo from '../img/logo_auchan.png';
+import silpoLogo from '../img/logo_silpo.svg';
+
 const carouselImages = [
   { src: news1, alt: 'Шампуні - Акція' },
   { src: news2, alt: 'Креми - Новинки' },
@@ -28,25 +38,31 @@ const carouselImages = [
   { src: news10, alt: 'Скраби - Акція' },
 ];
 
+const getRandomItems = (array, numItems) => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.min(numItems, array.length));
+};
+
 // Filter products with a rating
-const recommendedProducts = products.filter(product => product.rating);
+const recommendedProductsAll = products.filter(product => product.rating);
+const recommendedProducts = getRandomItems(recommendedProductsAll, 6);
 
-// Extract unique companies from storePrices
-const companies = Array.from(
-  new Set(products[0].storePrices.map(store => ({
-    name: store.name,
-    logo: store.logo,
-  })))
-);
+// Define the companies (8 existing + 10 new placeholders)
+const companies = [
+  { name: 'EVA', logo: evaLogo },
+  { name: 'Prostor', logo: prostorLogo },
+  { name: 'Watsons', logo: watsonsLogo },
+  { name: 'Rozetka', logo: rozetkaLogo },
+  { name: 'Makeup', logo: makeupLogo },
+  { name: 'Parfums', logo: parfumsLogo },
+  { name: 'Auchan', logo: auchanLogo },
+  { name: 'Silpo', logo: silpoLogo },
+];
 
-// Дублюємо компанії для безкінечного прокручування
-const VISIBLE_SLIDES = 6; // Кількість видимих слайдів у контейнері (955px / 140px ≈ 6)
-// Повторюємо компанії достатню кількість разів, щоб забезпечити безкінечне прокручування
-const REPEAT_FACTOR = Math.ceil((VISIBLE_SLIDES * 2) / companies.length) + 1; // Додаємо запас для плавного циклу
-const extendedCompanies = [];
-for (let i = 0; i < REPEAT_FACTOR * companies.length; i++) {
-  extendedCompanies.push(companies[i % companies.length]);
-}
+// Create an extended array for infinite scrolling
+const SLIDE_WIDTH = 159; // Static width of one slide in pixels (955px / 6 ≈ 159px)
+const EXTEND_FACTOR = 3; // Repeat the companies array 3 times for smooth infinite scrolling
+const extendedCompanies = Array(EXTEND_FACTOR).fill(companies).flat();
 
 // Дані підкатегорій
 const subcategoriesData = {
@@ -355,11 +371,11 @@ function CategoryList() {
   const [activeGroup, setActiveGroup] = useState(null);
   const [isHeroTransitioning, setIsHeroTransitioning] = useState(true);
   const [isProductTransitioning, setIsProductTransitioning] = useState(true);
+  const [isCompanyTransitioning, setIsCompanyTransitioning] = useState(true);
   const carouselIntervalRef = useRef(null);
   const productIntervalRef = useRef(null);
   const totalHeroSlides = carouselImages.length;
   const totalProductSlides = recommendedProducts.length;
-  const totalCompanySlides = companies.length;
 
   // Function to start or reset the hero carousel timer
   const startCarouselTimer = useCallback(() => {
@@ -427,17 +443,37 @@ function CategoryList() {
     startProductTimer();
   };
 
-  // Handle navigation for companies carousel (безкінечне прокручування)
+  // Handle navigation for companies carousel (infinite scrolling)
   const goToNextCompanySlide = () => {
+    setIsCompanyTransitioning(true);
     setCurrentCompanySlide((prev) => {
       const nextSlide = prev + 1;
+      // When reaching the middle set of companies, reset to the first set without animation
+      if (nextSlide === companies.length) {
+        setTimeout(() => {
+          setIsCompanyTransitioning(false);
+          setCurrentCompanySlide(0);
+          setTimeout(() => setIsCompanyTransitioning(true), 50);
+        }, 500);
+      }
       return nextSlide;
     });
   };
 
   const goToPrevCompanySlide = () => {
+    setIsCompanyTransitioning(true);
     setCurrentCompanySlide((prev) => {
       const prevSlide = prev - 1;
+      // When reaching the start, jump to the last set without animation
+      if (prevSlide < 0) {
+        const lastPosition = companies.length - 1;
+        setTimeout(() => {
+          setIsCompanyTransitioning(false);
+          setCurrentCompanySlide(lastPosition);
+          setTimeout(() => setIsCompanyTransitioning(true), 50);
+        }, 500);
+        return lastPosition;
+      }
       return prevSlide;
     });
   };
@@ -563,19 +599,21 @@ function CategoryList() {
                   <path d="M15 18L9 12L15 6" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-              <div
-                className="companies-inner"
-                style={{ transform: `translateX(-${(currentCompanySlide % totalCompanySlides) * 140}px)` }}
-              >
-                {extendedCompanies.map((company, index) => (
-                  <div key={index} className="company-slide">
-                    <img
-                      src={company.logo}
-                      alt={company.name}
-                      className="company-logo"
-                    />
-                  </div>
-                ))}
+              <div className="companies-viewport">
+                <div
+                  className={`companies-inner ${!isCompanyTransitioning ? 'no-transition' : ''}`}
+                  style={{ transform: `translateX(-${currentCompanySlide * SLIDE_WIDTH}px)` }}
+                >
+                  {extendedCompanies.map((company, index) => (
+                    <div key={`${company.name}-${index}`} className="company-slide">
+                      <img
+                        src={company.logo}
+                        alt={company.name}
+                        className="company-logo"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
               <button className="companies-nav next" onClick={goToNextCompanySlide}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

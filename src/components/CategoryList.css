@@ -41,6 +41,14 @@ body {
 .category-group {
   position: relative;
   margin-bottom: 20px;
+  border-bottom: 1px solid #000000; /* Black dividing line */
+  padding-bottom: 10px; /* Space between text and line */
+}
+
+/* Remove border from the last category group */
+.category-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .group-name-wrapper {
@@ -211,6 +219,10 @@ body {
   display: flex;
   align-items: center;
   width: 955px;
+}
+
+.companies-viewport {
+  width: 954px; /* 159px * 6 = 954px to fit exactly 6 slides */
   overflow: hidden;
 }
 
@@ -224,24 +236,22 @@ body {
 }
 
 .company-slide {
-  flex: 0 0 140px; /* Відповідність зсуву transform (140px) */
-  padding: 0 10px;
+  flex: 0 0 159px; /* Static width for each slide */
+  padding: 0 5px; /* Reduced padding to minimize gaps */
   display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
 .company-logo {
-  max-width: 100px;
+  width: 120px; /* Fixed width for all logos */
   height: 50px;
-  object-fit: contain;
+  object-fit: contain; /* Ensure logos scale properly within the fixed width */
   transition: opacity 0.3s ease;
 }
 
 .companies-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   background-color: rgba(255, 255, 255, 0.8);
   border: none;
   border-radius: 50%;
@@ -260,11 +270,11 @@ body {
 }
 
 .companies-nav.prev {
-  left: 10px;
+  margin-right: 10px; /* Space between button and viewport */
 }
 
 .companies-nav.next {
-  right: 10px;
+  margin-left: 10px; /* Space between viewport and button */
 }
 
 /* Recommended Products Carousel */
@@ -405,7 +415,7 @@ body {
   background-color: #364c75; /* Slightly darker peach on hover */
 }
 
-.recommended-dots  {
+.recommended-dots {
   display: flex;
   gap: 8px;
   justify-content: center;
@@ -413,5 +423,4 @@ body {
   background-color: #fff; /* Match the slide background */
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  z-index: 100;
 }
