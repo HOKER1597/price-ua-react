@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import './CategorySubcategories.css';
 
 // Дані підкатегорій на основі структури EVA.UA
-const subcategoriesData = {
+export const subcategoriesData = {
   makeup: [
     {
       category: 'Очі',
