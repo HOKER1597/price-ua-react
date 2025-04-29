@@ -44,7 +44,6 @@ export const categoryNames = {
 };
 
 function SearchResults({ results, searchQuery, onClose }) {
-
   const resultsRef = useRef(null);
 
   // Закриття при кліку поза компонентом
@@ -99,7 +98,11 @@ function SearchResults({ results, searchQuery, onClose }) {
         <Link
           to={`/search?query=${encodeURIComponent(searchQuery)}`}
           className="view-all"
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            // Ensure search term is fresh by resetting it
+            // This will force ProductList to use the query parameter
+          }}
         >
           Переглянути усі товари ({results.reduce((sum, cat) => sum + cat.count, 0)})
         </Link>

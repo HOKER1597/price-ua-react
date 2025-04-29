@@ -54,6 +54,7 @@ function Header({ setSearchTerm }) {
     setSearchQuery('');
     setSearchResults([]);
     setShowResults(false);
+    setSearchTerm(''); // Clear search term to avoid stale state
   };
 
   const handleCloseResults = () => {

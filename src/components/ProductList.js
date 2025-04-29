@@ -8,10 +8,10 @@ function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
   
-  // Отримання параметра 'type' і 'search'
+  // Отримання параметра 'type' і 'query'
   const queryParams = new URLSearchParams(location.search);
   const initialType = queryParams.get('type') || '';
-  const searchQuery = queryParams.get('search') || searchTerm;
+  const searchQuery = queryParams.get('query') || searchTerm || '';
   const isSearchPage = location.pathname === '/search'; // Перевірка, чи це сторінка /search
 
   // Стан для всіх фільтрів
@@ -20,7 +20,7 @@ function ProductList({ searchTerm }) {
     priceRanges: [],
     volumes: [],
     types: [],
-    categories: [], // Фільтр категорій
+    categories: [],
   });
 
   // Стан для вибраних фільтрів
@@ -88,18 +88,16 @@ function ProductList({ searchTerm }) {
 
   // Ініціалізація фільтрів
   useEffect(() => {
-    // Фільтруємо продукти за пошуковим запитом
+    // Фільтруємо продукти за пошуковим запитом і категорією
     let categoryProducts = products;
-    if (searchQuery) {
-      categoryProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    if (categoryId && !isSearchPage) {
+      categoryProducts = products.filter(
+        (product) => product.category === categoryId
       );
     }
-
-    // Якщо є categoryId, фільтруємо за категорією
-    if (categoryId) {
-      categoryProducts = categoryProducts.filter(
-        (product) => product.category === categoryId
+    if (searchQuery) {
+      categoryProducts = categoryProducts.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -114,32 +112,31 @@ function ProductList({ searchTerm }) {
     const brandCounts = {};
     const typeCounts = {};
     const categoryCounts = {};
-    products
-      .filter((product) =>
-        searchQuery
-          ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
-          : true
-      )
-      .forEach((product) => {
-        const brand = product.specs.brand;
-        const type = product.specs.type;
-        const category = product.category;
-        brandCounts[brand] = (brandCounts[brand] || 0) + 1;
-        if (type) {
-          typeCounts[type] = (typeCounts[type] || 0) + 1;
-        }
-        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-      });
+    let filteredForFilters = products;
+    if (categoryId && !isSearchPage) {
+      filteredForFilters = products.filter(
+        (product) => product.category === categoryId
+      );
+    }
+    if (searchQuery) {
+      filteredForFilters = filteredForFilters.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    filteredForFilters.forEach((product) => {
+      const brand = product.specs.brand;
+      const type = product.specs.type;
+      const category = product.category;
+      brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+      if (type) {
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      }
+      categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    });
 
     // Ініціалізуємо фільтри
     const allBrands = [...new Set(
-      products
-        .filter((product) =>
-          searchQuery
-            ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
-            : true
-        )
-        .map((product) => product.specs.brand)
+      filteredForFilters.map((product) => product.specs.brand)
     )].sort((a, b) => brandCounts[b] - brandCounts[a]);
 
     const allPriceRanges = [
@@ -157,13 +154,8 @@ function ProductList({ searchTerm }) {
     ];
 
     const allVolumes = [...new Set(
-      products
-        .filter((product) =>
-          searchQuery
-            ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-              product.specs.volume
-            : product.specs.volume
-        )
+      filteredForFilters
+        .filter((product) => product.specs.volume)
         .map((product) => product.specs.volume)
     )].sort((a, b) => {
       const numA = parseFloat(a.replace(/[^0-9.]/g, '')) || 0;
@@ -172,25 +164,22 @@ function ProductList({ searchTerm }) {
     });
 
     const allTypes = [...new Set(
-      products
-        .filter((product) =>
-          searchQuery
-            ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-              product.specs.type
-            : product.specs.type
-        )
+      filteredForFilters
+        .filter((product) => product.specs.type)
         .map((product) => product.specs.type)
     )].sort((a, b) => typeCounts[b] - typeCounts[a]);
 
-    const allCategories = [...new Set(
-      products
-        .filter((product) =>
-          searchQuery
-            ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
-            : true
-        )
-        .map((product) => product.category)
-    )].sort((a, b) => categoryCounts[b] - categoryCounts[a]);
+    const allCategories = isSearchPage
+      ? [...new Set(
+          products
+            .filter((product) =>
+              searchQuery
+                ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
+                : true
+            )
+            .map((product) => product.category)
+        )].sort((a, b) => categoryCounts[b] - categoryCounts[a])
+      : [categoryId].filter(Boolean);
 
     setFilters({
       brands: allBrands,
@@ -249,7 +238,7 @@ function ProductList({ searchTerm }) {
         }
       }, 0);
     }
-  }, [categoryId, searchQuery, initialType]);
+  }, [categoryId, searchQuery, initialType, isSearchPage]);
 
   // Оновлення кількості продуктів і неактивних фільтрів
   useEffect(() => {
@@ -260,6 +249,12 @@ function ProductList({ searchTerm }) {
       if (searchQuery) {
         updatedProducts = products.filter((product) =>
           product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      if (categoryId && !isSearchPage) {
+        updatedProducts = updatedProducts.filter(
+          (product) => product.category === categoryId
         );
       }
 
@@ -316,7 +311,13 @@ function ProductList({ searchTerm }) {
       );
     }
 
-    if (selectedFilters.categories.length > 0) {
+    if (categoryId && !isSearchPage) {
+      updatedProducts = updatedProducts.filter(
+        (product) => product.category === categoryId
+      );
+    }
+
+    if (selectedFilters.categories.length > 0 && isSearchPage) {
       updatedProducts = updatedProducts.filter((product) =>
         selectedFilters.categories.includes(product.category)
       );
@@ -427,6 +428,8 @@ function ProductList({ searchTerm }) {
     customPriceTo,
     searchQuery,
     filters,
+    categoryId,
+    isSearchPage,
   ]);
 
   // Обробка кліків поза плашкою
@@ -526,7 +529,7 @@ function ProductList({ searchTerm }) {
       categories: customFilters.categories || [],
     };
 
-    if (categoryId) {
+    if (categoryId && !isSearchPage) {
       updatedProducts = updatedProducts.filter(
         (product) => product.category === categoryId
       );
@@ -694,7 +697,6 @@ function ProductList({ searchTerm }) {
     (appliedFilters.types?.length || 0) +
     (isSearchPage ? (appliedFilters.categories?.length || 0) : 0) +
     (customPriceFrom !== '' && customPriceTo !== '' ? 1 : 0);
-
 
   return (
     <div className="product-list">
@@ -1056,7 +1058,7 @@ function ProductList({ searchTerm }) {
                   </button>
                 ))}
                 <button
-                  className="pagination-btn"
+                  classudeau="pagination-btn"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
