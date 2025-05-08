@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/static/css/main.5d32de88.css",
+    "main.js": "/static/js/main.9def5d91.js",
+    "static/media/news2.avif": "/static/media/news2.5113d10229fe04bd60eb.avif",
+    "static/media/news6.avif": "/static/media/news6.c8b4dd412775cd2950fa.avif",
+    "static/media/news7.avif": "/static/media/news7.a23fdc395f6c088f098a.avif",
+    "static/media/news3.avif": "/static/media/news3.2f7134fbe34d40910646.avif",
+    "static/media/news5.avif": "/static/media/news5.823e9f1bfeca94b88cc1.avif",
+    "static/media/news9.avif": "/static/media/news9.1458b0645f1c1895abce.avif",
+    "static/media/news4.avif": "/static/media/news4.a6e9476b12f779fdd2ae.avif",
+    "static/media/news8.avif": "/static/media/news8.716fb43ad6b9f0bdbde0.avif",
+    "static/media/news10.avif": "/static/media/news10.a69196aa7d834c7dcf23.avif",
+    "static/media/news1.avif": "/static/media/news1.073da189ff4d1f55400f.avif",
+    "static/media/logo_watsons.jpg": "/static/media/logo_watsons.c0daf7c888577463a694.jpg",
+    "static/media/logo_silpo.svg": "/static/media/logo_silpo.22b56262ed5709aef808f3474fd92553.svg",
+    "static/media/logo_eva.svg": "/static/media/logo_eva.ed55efc65aa2190120df938a414b2457.svg",
+    "index.html": "/index.html",
+    "main.5d32de88.css.map": "/static/css/main.5d32de88.css.map",
+    "main.9def5d91.js.map": "/static/js/main.9def5d91.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5d32de88.css",
+    "static/js/main.9def5d91.js"
+  ]
+}
