@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import './CategoryList.css';
-import products from '../data/products';
 import { subcategoriesData } from './CategorySubcategories';
 
 // Images for the hero carousel
@@ -39,16 +39,7 @@ const carouselImages = [
   { src: news10, alt: 'Скраби - Акція' },
 ];
 
-const getRandomItems = (array, numItems) => {
-  const shuffled = [...array].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(numItems, array.length));
-};
-
-// Filter products with a rating
-const recommendedProductsAll = products.filter(product => product.rating);
-const recommendedProducts = getRandomItems(recommendedProductsAll, 6);
-
-// Define the companies (8 existing + 10 new placeholders)
+// Define the companies
 const companies = [
   { name: 'EVA', logo: evaLogo },
   { name: 'Prostor', logo: prostorLogo },
@@ -64,7 +55,6 @@ const companies = [
 const SLIDE_WIDTH = 159; // Static width of one slide in pixels (955px / 6 ≈ 159px)
 const EXTEND_FACTOR = 3; // Repeat the companies array 3 times for smooth infinite scrolling
 const extendedCompanies = Array(EXTEND_FACTOR).fill(companies).flat();
-
 
 // Групи для бічної панелі
 const groups = [
@@ -85,10 +75,46 @@ function CategoryList() {
   const [isHeroTransitioning, setIsHeroTransitioning] = useState(true);
   const [isProductTransitioning, setIsProductTransitioning] = useState(true);
   const [isCompanyTransitioning, setIsCompanyTransitioning] = useState(true);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [error, setError] = useState(null);
   const carouselIntervalRef = useRef(null);
   const productIntervalRef = useRef(null);
   const totalHeroSlides = carouselImages.length;
   const totalProductSlides = recommendedProducts.length;
+
+  // Завантаження рекомендованих продуктів з API
+  useEffect(() => {
+    const fetchRecommendedProducts = async () => {
+      setIsLoading(true);
+      setIsFadingOut(false);
+      setError(null);
+      try {
+        const response = await axios.get('http://localhost:5000/products', {
+          params: {
+            limit: 6,
+            hasRating: true,
+            random: true
+          }
+        });
+        console.log('Recommended Products API Response:', response.data); // Дебагування
+        setRecommendedProducts(response.data.products);
+      } catch (err) {
+        console.error('Помилка завантаження рекомендованих продуктів:', err);
+        setError('Не вдалося завантажити рекомендовані продукти.');
+      } finally {
+        setTimeout(() => {
+          setIsFadingOut(true);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 300); // Match the fadeOutOverlay animation duration
+        }, 0);
+      }
+    };
+
+    fetchRecommendedProducts();
+  }, []);
 
   // Function to start or reset the hero carousel timer
   const startCarouselTimer = useCallback(() => {
@@ -98,13 +124,13 @@ function CategoryList() {
     carouselIntervalRef.current = setInterval(() => {
       setCurrentSlide((prev) => {
         const nextSlide = prev + 1;
-        if (nextSlide >= totalHeroSlides) {
+        if (prev >= totalHeroSlides - 1) {
           setTimeout(() => {
             setIsHeroTransitioning(false);
             setCurrentSlide(0);
             setTimeout(() => setIsHeroTransitioning(true), 50);
           }, 500);
-          return nextSlide;
+          return 0;
         }
         return nextSlide;
       });
@@ -119,13 +145,13 @@ function CategoryList() {
     productIntervalRef.current = setInterval(() => {
       setCurrentProductSlide((prev) => {
         const nextSlide = prev + 1;
-        if (nextSlide >= totalProductSlides) {
+        if (prev >= totalProductSlides - 1) {
           setTimeout(() => {
             setIsProductTransitioning(false);
             setCurrentProductSlide(0);
             setTimeout(() => setIsProductTransitioning(true), 50);
           }, 500);
-          return nextSlide;
+          return 0;
         }
         return nextSlide;
       });
@@ -206,7 +232,7 @@ function CategoryList() {
     const stars = [];
     for (let i = 0; i < 5; i++) {
       stars.push(
-        <span key={i} className={i < rating ? 'star filled' : 'star'}>
+        <span key={i} className={i < Math.round(rating) ? 'star filled' : 'star'}>
           ★
         </span>
       );
@@ -214,9 +240,31 @@ function CategoryList() {
     return stars;
   };
 
+  // Get product price (minimum from store_prices)
+  const getProductPrice = (storePrices) => {
+    if (!storePrices || storePrices.length === 0) return 'Н/Д';
+    return Math.min(...storePrices.map(sp => sp.price));
+  };
+
   // Create extended arrays for hero and products carousels
   const extendedHeroImages = [...carouselImages, ...carouselImages.slice(0, 1)];
   const extendedProducts = [...recommendedProducts, ...recommendedProducts.slice(0, 1)];
+
+  // Відображення спінера або помилки
+  if (isLoading) {
+    return (
+      <div className={`loading-overlay ${isFadingOut ? 'fade-out' : ''}`}>
+        <div className="spinner-container">
+          <div className="spinner"></div>
+          <p>Завантаження...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
 
   return (
     <div className="category-list">
@@ -282,7 +330,7 @@ function CategoryList() {
           <div className="carousel-wrapper">
             <div
               className={`carousel-inner ${!isHeroTransitioning ? 'no-transition' : ''}`}
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              style={{ transform: ` parents: translateX(-${currentSlide * 100}%)` }}
             >
               {extendedHeroImages.map((image, index) => (
                 <div key={index} className="carousel-slide">
@@ -347,9 +395,13 @@ function CategoryList() {
                 <div key={index} className="recommended-slide">
                   <Link to={`/product/${product.id}`}>
                     <img
-                      src={product.image}
+                      src={product.images[0] || '/img/placeholder.webp'}
                       alt={product.name}
                       className="recommended-image"
+                      onError={(e) => {
+                        console.log(`Помилка завантаження зображення: ${product.images[0]}`);
+                        e.target.src = '/img/placeholder.webp';
+                      }}
                     />
                   </Link>
                   <div className="recommended-details">
@@ -357,11 +409,11 @@ function CategoryList() {
                       <h3 className="recommended-name">{product.name}</h3>
                     </Link>
                     <div className="recommended-rating">
-                      {renderStars(product.rating)}
-                      <span className="recommended-reviews">({product.views})</span>
+                      {renderStars(product.rating || 0)}
+                      <span className="recommended-reviews">({product.views || 0})</span>
                     </div>
                     <div className="recommended-pricing">
-                      <span className="recommended-original-price">{product.price} грн</span>
+                      <span className="recommended-original-price">{getProductPrice(product.store_prices)} грн</span>
                     </div>
                     <Link to={`/product/${product.id}`}>
                       <button className="recommended-add-to-cart">

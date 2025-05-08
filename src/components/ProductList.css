@@ -17,7 +17,7 @@
   align-items: flex-start; /* Prevent stretching due to filters */
 }
 
-.products{
+.products {
   order: 2; /* Продукти справа */
 }
 
@@ -29,6 +29,12 @@
   order: 2; /* Продукти справа */
   position: relative; /* Для коректного накладання плашки */
   min-height: 400px; /* Ensure minimum height for products area */
+  opacity: 0; /* Початкова прозорість для анімації */
+  transition: opacity 0.3s ease-out; /* Анімація появи */
+}
+
+.products-list.loaded {
+  opacity: 1; /* Повна видимість після завантаження */
 }
 
 .product-card {
@@ -381,4 +387,88 @@
   font-size: 12px;
   color: #333;
   background-color: #fff;
+}
+
+/* Стилі для затемнення та спінера */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Напівпрозоре затемнення */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Поверх усіх елементів */
+  animation: fadeInOverlay 0.3s ease-in forwards; /* Анімація появи */
+  opacity: 0; /* Початкова прозорість */
+}
+
+@keyframes fadeInOverlay {
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-overlay.fade-out {
+  animation: fadeOutOverlay 0.3s ease-out forwards; /* Анімація зникнення */
+}
+
+@keyframes fadeOutOverlay {
+  to {
+    opacity: 0;
+  }
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInSpinner 0.3s ease-in forwards; /* Анімація появи */
+}
+
+.loading-overlay.fade-out .spinner-container {
+  animation: fadeOutSpinner 0.3s ease-out forwards; /* Анімація зникнення */
+}
+
+@keyframes fadeInSpinner {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeOutSpinner {
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.spinner {
+  border: 6px solid #f3f3f3; /* Світло-сірий фон */
+  border-top: 6px solid #6495ed; /* Синій, як у кнопок */
+  border-radius: 50%;
+  width: 60px; /* Більший розмір */
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+.spinner-container p {
+  font-size: 20px; /* Більший текст */
+  color: #fff; /* Білий для контрасту на темному фоні */
+  font-weight: 500;
+}
+
+/* Анімація для спінера */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
