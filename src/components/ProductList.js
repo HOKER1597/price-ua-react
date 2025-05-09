@@ -84,9 +84,10 @@ function ProductList({ searchTerm }) {
   // Стан для індикатора завантаження
   const [isLoading, setIsLoading] = useState(true);
 
-  // Рефи для позиціонування плашки
+  // Рефи для позиціонування плашки та анімації фільтрів
   const filterRefs = useRef({});
   const tagRef = useRef(null);
+  const filterItemsRefs = useRef({});
 
   // Функція для отримання мінімальної ціни з store_prices
   const getMinPrice = (storePrices) => {
@@ -622,14 +623,27 @@ function ProductList({ searchTerm }) {
       filteredItems = items.filter((brand) =>
         brand.toLowerCase().includes(brandSearch.toLowerCase())
       );
+      const topItems = filteredItems.slice(0, 12); // Top 12 brands (by count)
+      const remainingItems = filteredItems.slice(12); // Remaining brands
       if (showMore.brands || filteredItems.length <= 12) {
-        return [...filteredItems].sort((a, b) => a.localeCompare(b));
+        // Keep top 12 in original order, sort remaining alphabetically
+        return [...topItems, ...remainingItems.sort((a, b) => a.localeCompare(b))];
       }
-      return filteredItems.slice(0, 12);
+      return topItems;
     }
 
-    if (filterType === 'types' || filterType === 'categories') {
-      if (showMore[filterType] || items.length <= 6) {
+    if (filterType === 'types') {
+      const topItems = filteredItems.slice(0, 6); // Top 6 types (by count)
+      const remainingItems = filteredItems.slice(6); // Remaining types
+      if (showMore.types || filteredItems.length <= 6) {
+        // Keep top 6 in original order, sort remaining alphabetically
+        return [...topItems, ...remainingItems.sort((a, b) => a.localeCompare(b))];
+      }
+      return topItems;
+    }
+
+    if (filterType === 'categories') {
+      if (showMore.categories || items.length <= 6) {
         return [...items].sort((a, b) => a.localeCompare(b));
       }
       return items.slice(0, 6);
@@ -676,6 +690,29 @@ function ProductList({ searchTerm }) {
     (isSearchPage ? (appliedFilters.categories?.length || 0) : 0) +
     (customPriceFrom !== '' && customPriceTo !== '' ? 1 : 0);
 
+  // Оновлення висоти контейнерів фільтрів при зміні showMore або brandSearch
+  useEffect(() => {
+    Object.keys(showMore).forEach((filterType) => {
+      const container = filterItemsRefs.current[filterType];
+      if (container) {
+        const items = container.querySelector('.filter-items');
+        if (items) {
+          const visibleItems = getVisibleItems(filters[filterType], filterType);
+          const maxVisible = filterType === 'brands' || filterType === 'priceRanges' || filterType === 'volumes' ? 12 : 6;
+          const isExpanded = showMore[filterType] || visibleItems.length <= maxVisible;
+          // Обчислюємо висоту для згорнутого стану
+          const collapsedHeight = visibleItems.length > maxVisible
+            ? items.scrollHeight * (maxVisible / filters[filterType].length)
+            : items.scrollHeight;
+          // Встановлюємо max-height
+          container.style.maxHeight = isExpanded
+            ? `${items.scrollHeight}px`
+            : `${collapsedHeight}px`;
+        }
+      }
+    });
+  }, [showMore, filters, brandSearch, getVisibleItems]);
+
   return (
     <div className="product-list">
       <h2>Товари категорії</h2>
@@ -689,7 +726,7 @@ function ProductList({ searchTerm }) {
       )}
       <div className="product-list-container">
         {/* Filters column */}
-        <div className="filters">
+        <div className={`filters ${!isLoading ? 'loaded' : ''}`}>
           <div className="filters-header">
             <h3>Фільтри</h3>
             {totalAppliedFilters > 0 && (
@@ -759,27 +796,29 @@ function ProductList({ searchTerm }) {
           {isSearchPage && searchQuery && (
             <div className="filter-section">
               <h4>Категорія</h4>
-              <div className="filter-items filter-items-single-column">
-                {getVisibleItems(filters.categories, 'categories').map((category, index) => {
-                  const isDisabled = disabledFilters.categories.has(category);
-                  return (
-                    <label
-                      key={index}
-                      className={isDisabled ? 'disabled' : ''}
-                      ref={(el) => (filterRefs.current[`categories-${category}`] = el)}
-                    >
-                      <input
-                        type="checkbox"
-                        name="category"
-                        value={category}
-                        checked={selectedFilters.categories?.includes(category) || false}
-                        onChange={() => handleFilterChange('categories', category)}
-                        disabled={isDisabled}
-                      />
-                      {categoryNames[category] || category}
-                    </label>
-                  );
-                })}
+              <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['categories'] = el)}>
+                <div className="filter-items filter-items-single-column">
+                  {getVisibleItems(filters.categories, 'categories').map((category, index) => {
+                    const isDisabled = disabledFilters.categories.has(category);
+                    return (
+                      <label
+                        key={index}
+                        className={isDisabled ? 'disabled' : ''}
+                        ref={(el) => (filterRefs.current[`categories-${category}`] = el)}
+                      >
+                        <input
+                          type="checkbox"
+                          name="category"
+                          value={category}
+                          checked={selectedFilters.categories?.includes(category) || false}
+                          onChange={() => handleFilterChange('categories', category)}
+                          disabled={isDisabled}
+                        />
+                        {categoryNames[category] || category}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
               {filters.categories.length > 6 && (
                 <button
@@ -802,29 +841,31 @@ function ProductList({ searchTerm }) {
               value={brandSearch}
               onChange={handleBrandSearch}
             />
-            <div className="filter-items">
-              {getVisibleItems(filters.brands, 'brands').map((brand, index) => {
-                const isDisabled = disabledFilters.brands.has(brand);
-                return (
-                  <label
-                    key={index}
-                    className={`${brand.length > 13 ? 'span-two-columns' : ''} ${
-                      isDisabled ? 'disabled' : ''
-                    }`}
-                    ref={(el) => (filterRefs.current[`brands-${brand}`] = el)}
-                  >
-                    <input
-                      type="checkbox"
-                      name="brand"
-                      value={brand}
-                      checked={selectedFilters.brands?.includes(brand) || false}
-                      onChange={() => handleFilterChange('brands', brand)}
-                      disabled={isDisabled}
-                    />
-                    {brand}
-                  </label>
-                );
-              })}
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['brands'] = el)}>
+              <div className="filter-items">
+                {getVisibleItems(filters.brands, 'brands').map((brand, index) => {
+                  const isDisabled = disabledFilters.brands.has(brand);
+                  return (
+                    <label
+                      key={index}
+                      className={`${brand.length > 13 ? 'span-two-columns' : ''} ${
+                        isDisabled ? 'disabled' : ''
+                      }`}
+                      ref={(el) => (filterRefs.current[`brands-${brand}`] = el)}
+                    >
+                      <input
+                        type="checkbox"
+                        name="brand"
+                        value={brand}
+                        checked={selectedFilters.brands?.includes(brand) || false}
+                        onChange={() => handleFilterChange('brands', brand)}
+                        disabled={isDisabled}
+                      />
+                      {brand}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             {filters.brands.length > 12 && (
               <button
@@ -855,27 +896,29 @@ function ProductList({ searchTerm }) {
                 className="price-input"
               />
             </div>
-            <div className="filter-items">
-              {getVisibleItems(filters.priceRanges, 'priceRanges').map((range, index) => {
-                const isDisabled = disabledFilters.priceRanges.has(range.label);
-                return (
-                  <label
-                    key={index}
-                    className={isDisabled ? 'disabled' : ''}
-                    ref={(el) => (filterRefs.current[`priceRanges-${range.label}`] = el)}
-                  >
-                    <input
-                      type="checkbox"
-                      name="priceRange"
-                      value={range.label}
-                      checked={selectedFilters.priceRanges?.includes(range.label) || false}
-                      onChange={() => handleFilterChange('priceRanges', range.label)}
-                      disabled={isDisabled}
-                    />
-                    {range.label}
-                  </label>
-                );
-              })}
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['priceRanges'] = el)}>
+              <div className="filter-items">
+                {getVisibleItems(filters.priceRanges, 'priceRanges').map((range, index) => {
+                  const isDisabled = disabledFilters.priceRanges.has(range.label);
+                  return (
+                    <label
+                      key={index}
+                      className={isDisabled ? 'disabled' : ''}
+                      ref={(el) => (filterRefs.current[`priceRanges-${range.label}`] = el)}
+                    >
+                      <input
+                        type="checkbox"
+                        name="priceRange"
+                        value={range.label}
+                        checked={selectedFilters.priceRanges?.includes(range.label) || false}
+                        onChange={() => handleFilterChange('priceRanges', range.label)}
+                        disabled={isDisabled}
+                      />
+                      {range.label}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             {filters.priceRanges.length > 12 && (
               <button
@@ -890,27 +933,29 @@ function ProductList({ searchTerm }) {
           {/* Volume filter */}
           <div className="filter-section">
             <h4>Об’єм</h4>
-            <div className="filter-items">
-              {getVisibleItems(filters.volumes, 'volumes').map((volume, index) => {
-                const isDisabled = disabledFilters.volumes.has(volume);
-                return (
-                  <label
-                    key={index}
-                    className={isDisabled ? 'disabled' : ''}
-                    ref={(el) => (filterRefs.current[`volumes-${volume}`] = el)}
-                  >
-                    <input
-                      type="checkbox"
-                      name="volume"
-                      value={volume}
-                      checked={selectedFilters.volumes?.includes(volume) || false}
-                      onChange={() => handleFilterChange('volumes', volume)}
-                      disabled={isDisabled}
-                    />
-                    {volume}
-                  </label>
-                );
-              })}
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['volumes'] = el)}>
+              <div className="filter-items">
+                {getVisibleItems(filters.volumes, 'volumes').map((volume, index) => {
+                  const isDisabled = disabledFilters.volumes.has(volume);
+                  return (
+                    <label
+                      key={index}
+                      className={isDisabled ? 'disabled' : ''}
+                      ref={(el) => (filterRefs.current[`volumes-${volume}`] = el)}
+                    >
+                      <input
+                        type="checkbox"
+                        name="volume"
+                        value={volume}
+                        checked={selectedFilters.volumes?.includes(volume) || false}
+                        onChange={() => handleFilterChange('volumes', volume)}
+                        disabled={isDisabled}
+                      />
+                      {volume}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             {filters.volumes.length > 12 && (
               <button
@@ -925,27 +970,29 @@ function ProductList({ searchTerm }) {
           {/* Type filter */}
           <div className="filter-section">
             <h4>Тип</h4>
-            <div className="filter-items filter-items-single-column">
-              {getVisibleItems(filters.types, 'types').map((type, index) => {
-                const isDisabled = disabledFilters.types.has(type);
-                return (
-                  <label
-                    key={index}
-                    className={isDisabled ? 'disabled' : ''}
-                    ref={(el) => (filterRefs.current[`types-${type}`] = el)}
-                  >
-                    <input
-                      type="checkbox"
-                      name="type"
-                      value={type}
-                      checked={selectedFilters.types?.includes(type) || false}
-                      onChange={() => handleFilterChange('types', type)}
-                      disabled={isDisabled}
-                    />
-                    {type}
-                  </label>
-                );
-              })}
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['types'] = el)}>
+              <div className="filter-items filter-items-single-column">
+                {getVisibleItems(filters.types, 'types').map((type, index) => {
+                  const isDisabled = disabledFilters.types.has(type);
+                  return (
+                    <label
+                      key={index}
+                      className={isDisabled ? 'disabled' : ''}
+                      ref={(el) => (filterRefs.current[`types-${type}`] = el)}
+                    >
+                      <input
+                        type="checkbox"
+                        name="type"
+                        value={type}
+                        checked={selectedFilters.types?.includes(type) || false}
+                        onChange={() => handleFilterChange('types', type)}
+                        disabled={isDisabled}
+                      />
+                      {type}
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             {filters.types.length > 6 && (
               <button
@@ -965,17 +1012,9 @@ function ProductList({ searchTerm }) {
               onClick={applyFilters}
               style={{
                 top: filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
-                  ? `${
-                      filterRefs.current[
-                        `${activeFilter.type}-${activeFilter.value}`
-                      ].getBoundingClientRect().top -
-                      filterRefs.current[
-                        `${activeFilter.type}-${activeFilter.value}`
-                      ].closest('.filters').getBoundingClientRect().top +
-                      filterRefs.current[
-                        `${activeFilter.type}-${activeFilter.value}`
-                      ].offsetHeight / 2
-                    }px`
+                  ? `${filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].getBoundingClientRect().top -
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].closest('.filters').getBoundingClientRect().top +
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].offsetHeight / 2}px`
                   : '0px',
               }}
             >
@@ -1015,7 +1054,7 @@ function ProductList({ searchTerm }) {
                           ? product.images[0]
                           : '/img/placeholder.webp'
                       }
-                      alt={product.name}
+                      alt={-product.name}
                       onError={(e) => (e.target.src = '/img/placeholder.webp')}
                     />
                     <p className="price">{getMinPrice(product.store_prices)} грн</p>

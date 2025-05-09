@@ -96,7 +96,7 @@ body {
   top: 0;
   left: 100%;
   background-color: white;
-  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), 4px 0 8px rgba(0, 0, 0, 0.1), 0 8px 12px rgba(0, 0, 0, 0.15);;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), 4px 0 8px rgba(0, 0, 0, 0.1), 0 8px 12px rgba(0, 0, 0, 0.15);
   border-radius: 6px;
   z-index: 1000;
   width: 800px;
@@ -273,18 +273,16 @@ body {
   margin-top: 20px;
 }
 
-.animate-companies .company-slide {
-  animation: slideInRight 0.6s ease-out forwards;
+.animate-companies {
+  animation: fadeInCompanies 0.6s ease-out forwards;
 }
 
-@keyframes slideInRight {
+@keyframes fadeInCompanies {
   from {
     opacity: 0;
-    transform: translateX(50px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -367,18 +365,18 @@ body {
   flex-direction: column; /* Ensure vertical stacking */
 }
 
-.animate-recommended .recommended-slide {
-  animation: slideUp 0.6s ease-out forwards;
+.animate-recommended {
+  animation: slideInRightRecommended 0.6s ease-out forwards;
 }
 
-@keyframes slideUp {
+@keyframes slideInRightRecommended {
   from {
     opacity: 0;
-    transform: translateY(50px);
+    transform: translateX(50px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
@@ -431,9 +429,7 @@ body {
 
 .recommended-details {
   display: flex;
-  flex-direction: column
-
-;
+  flex-direction: column;
   align-items: flex-start;
   width: 100%;
   padding: 0 5px;
