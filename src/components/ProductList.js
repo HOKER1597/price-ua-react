@@ -614,7 +614,7 @@ function ProductList({ searchTerm }) {
   };
 
   // Обмеження кількості елементів для фільтрів
-  const getVisibleItems = (items, filterType) => {
+  const getVisibleItems = useCallback((items, filterType) => {
     if (!items) return [];
 
     let filteredItems = items;
@@ -653,7 +653,7 @@ function ProductList({ searchTerm }) {
       return items;
     }
     return items.slice(0, 12);
-  };
+  }, [brandSearch, showMore]);
 
   // Модифікація назви продукту
   const getProductName = (product) => {
@@ -1054,7 +1054,7 @@ function ProductList({ searchTerm }) {
                           ? product.images[0]
                           : '/img/placeholder.webp'
                       }
-                      alt={-product.name}
+                      alt={product.name}
                       onError={(e) => (e.target.src = '/img/placeholder.webp')}
                     />
                     <p className="price">{getMinPrice(product.store_prices)} грн</p>
