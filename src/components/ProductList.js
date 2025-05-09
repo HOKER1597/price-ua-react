@@ -274,7 +274,7 @@ function ProductList({ searchTerm }) {
       setIsLoading(true); // Починаємо завантаження
       try {
         // Завантажуємо всі продукти без пагінації
-        const response = await axios.get('http://localhost:5000/products', {
+        const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: {
             limit: 1000, // Велике значення, щоб отримати всі продукти
           },

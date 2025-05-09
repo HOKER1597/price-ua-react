@@ -91,7 +91,7 @@ function CategoryList() {
       setIsFadingOut(false);
       setError(null);
       try {
-        const response = await axios.get('http://localhost:5000/products', {
+        const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: {
             limit: 6,
             hasRating: true,

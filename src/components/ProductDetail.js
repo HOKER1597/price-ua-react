@@ -26,7 +26,7 @@ function ProductDetail() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`http://localhost:5000/products/${productId}`);
+        const response = await axios.get(`https://price-ua-react-backend.onrender.com/products/${productId}`);
         console.log('API Response:', response.data); // Дебагування
         setProduct(response.data);
       } catch (err) {
