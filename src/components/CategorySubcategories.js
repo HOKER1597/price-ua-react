@@ -319,7 +319,7 @@ function CategorySubcategories() {
               <div key={index} className="subcategory-group">
                 <Link
                   to={`/category/${subcategory.categoryId}`}
-                  className="subcategory-title"
+                  className="subcategory-title animate-subcategory-title"
                 >
                   {subcategory.category}
                 </Link>

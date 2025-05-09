@@ -72,6 +72,7 @@ function CategoryList() {
   const [currentProductSlide, setCurrentProductSlide] = useState(0);
   const [currentCompanySlide, setCurrentCompanySlide] = useState(0);
   const [activeGroup, setActiveGroup] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
   const [isHeroTransitioning, setIsHeroTransitioning] = useState(true);
   const [isProductTransitioning, setIsProductTransitioning] = useState(true);
   const [isCompanyTransitioning, setIsCompanyTransitioning] = useState(true);
@@ -217,14 +218,28 @@ function CategoryList() {
     });
   };
 
-  // Handle mouse enter to show dropdown
+  // Handle mouse enter to show dropdown with animation reset
   const handleMouseEnter = (groupId) => {
-    setActiveGroup(groupId);
+    if (activeGroup !== groupId) {
+      if (activeGroup) {
+        setIsClosing(true);
+        setTimeout(() => {
+          setIsClosing(false);
+          setActiveGroup(groupId);
+        }, 200); // Тривалість dropdownFadeOut
+      } else {
+        setActiveGroup(groupId);
+      }
+    }
   };
 
   // Handle mouse leave to close dropdown
   const handleMouseLeave = () => {
-    setActiveGroup(null);
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setActiveGroup(null);
+    }, 200); // Тривалість dropdownFadeOut
   };
 
   // Function to render star rating
@@ -273,11 +288,11 @@ function CategoryList() {
           className="categories-container"
           onMouseLeave={handleMouseLeave}
         >
-          <div className="categories-sidebar">
+          <div className="categories-sidebar animate-sidebar">
             {groups.map(group => (
               <div
                 key={group.id}
-                className="category-group"
+                className="category-group animate-category"
                 onMouseEnter={() => handleMouseEnter(group.id)}
               >
                 <Link
@@ -290,13 +305,13 @@ function CategoryList() {
             ))}
           </div>
           {activeGroup && (
-            <div className="dropdown active">
+            <div className={`dropdown ${activeGroup ? 'active' : ''} ${isClosing ? 'closing' : ''}`}>
               <div className="dropdown-content">
                 {subcategoriesData[activeGroup]?.map((subcategory, index) => (
                   <div key={index} className="subcategory-group">
                     <Link
                       to={`/category/${subcategory.categoryId}`}
-                      className="subcategory-title"
+                      className="subcategory-title animate-subcategory-title"
                     >
                       {subcategory.category}
                     </Link>
@@ -305,7 +320,7 @@ function CategoryList() {
                         <li key={item.id}>
                           <Link
                             to={`/category/${subcategory.categoryId}${item.type ? `?type=${encodeURIComponent(item.type)}` : ''}`}
-                            className="subcategory-link"
+                            className="subcategory-link animate-subcategory-link"
                           >
                             {item.name}
                           </Link>
@@ -317,7 +332,7 @@ function CategoryList() {
                 <div className="subcategory-group">
                   <Link
                     to={`/subcategories/${activeGroup}`}
-                    className="subcategory-title all-categories"
+                    className="subcategory-title all-categories animate-subcategory-title"
                   >
                     Усі категорії
                   </Link>
@@ -326,11 +341,11 @@ function CategoryList() {
             </div>
           )}
         </div>
-        <div className="hero-carousel">
+        <div className="hero-carousel animate-hero">
           <div className="carousel-wrapper">
             <div
               className={`carousel-inner ${!isHeroTransitioning ? 'no-transition' : ''}`}
-              style={{ transform: ` parents: translateX(-${currentSlide * 100}%)` }}
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               {extendedHeroImages.map((image, index) => (
                 <div key={index} className="carousel-slide">
@@ -352,7 +367,7 @@ function CategoryList() {
               ))}
             </div>
           </div>
-          <div className="companies-carousel">
+          <div className="companies-carousel animate-companies">
             <h2 className="companies-header">Компанії, з якими ми працюємо</h2>
             <div className="companies-wrapper">
               <button className="companies-nav prev" onClick={goToPrevCompanySlide}>
@@ -384,7 +399,7 @@ function CategoryList() {
             </div>
           </div>
         </div>
-        <div className="recommended-products">
+        <div className="recommended-products animate-recommended">
           <div className="recommended-header">Рекомендації</div>
           <div className="recommended-wrapper">
             <div

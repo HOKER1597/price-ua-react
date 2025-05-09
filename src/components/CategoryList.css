@@ -38,11 +38,31 @@ body {
   margin-top: 0; /* Ensure no left margin */
 }
 
+.animate-sidebar {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 .category-group {
   position: relative;
   margin-bottom: 20px;
   border-bottom: 1px solid #000000; /* Black dividing line */
   padding-bottom: 10px; /* Space between text and line */
+  transition: transform 0.2s ease;
+}
+
+.animate-category:hover {
+  transform: scale(1.05);
 }
 
 /* Remove border from the last category group */
@@ -76,21 +96,50 @@ body {
   top: 0;
   left: 100%;
   background-color: white;
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), 4px 0 8px rgba(0, 0, 0, 0.1), 0 8px 12px rgba(0, 0, 0, 0.15);;
   border-radius: 6px;
   z-index: 1000;
   width: 800px;
   padding: 20px;
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateX(-10px);
   visibility: hidden;
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+  transition: visibility 0s linear 0.2s; /* Only for visibility */
 }
 
 .dropdown.active {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
   visibility: visible;
+  animation: dropdownFadeIn 0.2s ease forwards;
+  transition: visibility 0s linear 0s;
+}
+
+.dropdown.closing {
+  animation: dropdownFadeOut 0.2s ease forwards;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes dropdownFadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+    visibility: hidden;
+  }
 }
 
 .dropdown-content {
@@ -111,10 +160,12 @@ body {
   margin-bottom: 15px;
   text-decoration: none;
   display: block;
-  transition: color 0.2s;
+  transition: color 0.2s ease, transform 0.2s ease;
+  transform-origin: left;
 }
 
-.subcategory-title:hover {
+.animate-subcategory-title:hover {
+  transform: scale(1.05);
   color: #0288d1;
 }
 
@@ -132,10 +183,13 @@ body {
   font-weight: 400;
   color: #555;
   text-decoration: none;
-  transition: color 0.2s;
+  display: block;
+  transition: color 0.2s ease, transform 0.2s ease;
+  transform-origin: left;
 }
 
 .subcategory-link:hover {
+  transform: scale(1.05);
   color: #0288d1;
 }
 
@@ -149,6 +203,19 @@ body {
   flex: 1;
   max-width: 1000px;
   margin-left: 0; /* Move closer to categories */
+}
+
+.animate-hero .carousel-slide {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .carousel-wrapper {
@@ -204,6 +271,21 @@ body {
 /* Companies Carousel */
 .companies-carousel {
   margin-top: 20px;
+}
+
+.animate-companies .company-slide {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .companies-header {
@@ -262,11 +344,7 @@ body {
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: background-color 0.2s;
-}
-
-.companies-nav:hover {
-  background-color: rgba(255, 255, 255, 1);
+  transition: background-color rgba(255, 255, 255, 1);
 }
 
 .companies-nav.prev {
@@ -287,6 +365,21 @@ body {
   margin-left: auto;
   display: flex;
   flex-direction: column; /* Ensure vertical stacking */
+}
+
+.animate-recommended .recommended-slide {
+  animation: slideUp 0.6s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .recommended-header {
@@ -338,7 +431,9 @@ body {
 
 .recommended-details {
   display: flex;
-  flex-direction: column;
+  flex-direction: column
+
+;
   align-items: flex-start;
   width: 100%;
   padding: 0 5px;
