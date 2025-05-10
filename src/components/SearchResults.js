@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './SearchResults.css';
 
@@ -45,12 +45,21 @@ export const categoryNames = {
 
 function SearchResults({ results, searchQuery, onClose }) {
   const resultsRef = useRef(null);
+  const [isInitialOpen, setIsInitialOpen] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
+  const [showText, setShowText] = useState(false);
 
-  // Закриття при кліку поза компонентом
+  // Handle click outside to close with animation
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (resultsRef.current && !resultsRef.current.contains(event.target)) {
-        onClose();
+        setIsClosing(true);
+        setTimeout(() => {
+          setIsClosing(false);
+          onClose();
+          setIsInitialOpen(true); // Reset for next open
+          setShowText(false); // Reset text visibility
+        }, 200); // Match the fadeOut animation duration
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -59,24 +68,58 @@ function SearchResults({ results, searchQuery, onClose }) {
     };
   }, [onClose]);
 
+  // Trigger text animation when results change or popup opens
+  useEffect(() => {
+    if (results.length > 0) {
+      // Delay text rendering slightly to sync with popup animation
+      const timer = setTimeout(() => {
+        setShowText(true);
+      }, 50); // Small delay to ensure popup starts animating first
+      return () => clearTimeout(timer);
+    } else {
+      setShowText(false);
+    }
+  }, [results]);
+
   return (
-    <div className="search-results" ref={resultsRef}>
-      {results.slice(0, 2).map((category, index) => (
+    <div
+      className={`search-results ${isInitialOpen ? 'initial-open' : ''} ${isClosing ? 'closing' : ''}`}
+      ref={resultsRef}
+    >
+      {showText && results.slice(0, 2).map((category, index) => (
         <div key={index} className="search-category">
           <Link
             to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
-            className="category-title"
-            onClick={onClose}
+            className="category-title animate-text"
+            onClick={() => {
+              setIsClosing(true);
+              setTimeout(() => {
+                setIsClosing(false);
+                onClose();
+                setIsInitialOpen(true);
+                setShowText(false);
+              }, 200);
+            }}
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
             {categoryNames[category.category] || category.category} ({category.count})
           </Link>
           <ul className="product-list">
-            {category.products.slice(0, 5).map((product) => (
+            {category.products.slice(0, 5).map((product, idx) => (
               <li key={product.id}>
                 <Link
                   to={`/product/${product.id}`}
-                  className="product-link"
-                  onClick={onClose}
+                  className="product-link animate-text"
+                  onClick={() => {
+                    setIsClosing(true);
+                    setTimeout(() => {
+                      setIsClosing(false);
+                      onClose();
+                      setIsInitialOpen(true);
+                      setShowText(false);
+                    }, 200);
+                  }}
+                  style={{ animationDelay: `${(index * 0.1) + (idx * 0.05) + 0.2}s` }}
                 >
                   {`${product.name} (${product.specs.volume || 'Н/Д'})`}
                 </Link>
@@ -86,23 +129,37 @@ function SearchResults({ results, searchQuery, onClose }) {
           {category.products.length > 5 && (
             <Link
               to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
-              className="more-products"
-              onClick={onClose}
+              className="more-products animate-text"
+              onClick={() => {
+                setIsClosing(true);
+                setTimeout(() => {
+                  setIsClosing(false);
+                  onClose();
+                  setIsInitialOpen(true);
+                  setShowText(false);
+                }, 200);
+              }}
+              style={{ animationDelay: `${(index * 0.1) + 0.45}s` }}
             >
               Подивитись інші товари ({category.products.length - 5})
             </Link>
           )}
         </div>
       ))}
-      {results.length > 2 && (
+      {showText && results.length > 0 && (
         <Link
           to={`/search?query=${encodeURIComponent(searchQuery)}`}
-          className="view-all"
+          className="view-all animate-text"
           onClick={() => {
-            onClose();
-            // Ensure search term is fresh by resetting it
-            // This will force ProductList to use the query parameter
+            setIsClosing(true);
+            setTimeout(() => {
+              setIsClosing(false);
+              onClose();
+              setIsInitialOpen(true);
+              setShowText(false);
+            }, 200);
           }}
+          style={{ animationDelay: '0.5s' }}
         >
           Переглянути усі товари ({results.reduce((sum, cat) => sum + cat.count, 0)})
         </Link>

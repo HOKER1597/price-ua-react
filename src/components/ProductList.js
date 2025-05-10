@@ -8,11 +8,19 @@ function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
 
-  // Отримання параметра 'type' і 'query'
+  // Отримуємо параметри з URL, враховуючи як 'query', так і 'search'
   const queryParams = new URLSearchParams(location.search);
   const initialType = queryParams.get('type') || '';
-  const searchQuery = queryParams.get('query') || searchTerm || '';
+  const searchQuery = queryParams.get('query') || queryParams.get('search') || searchTerm || '';
   const isSearchPage = location.pathname === '/search';
+  console.log('ProductList initialized with:', {
+    categoryId,
+    searchTerm,
+    searchQuery,
+    initialType,
+    isSearchPage,
+    location: location.pathname + location.search,
+  });
 
   // Стан для всіх фільтрів
   const [filters, setFilters] = useState({
@@ -274,29 +282,39 @@ function ProductList({ searchTerm }) {
     const fetchProducts = async () => {
       setIsLoading(true); // Починаємо завантаження
       try {
-        // Завантажуємо всі продукти без пагінації
+        // Логування параметрів запиту
+        const requestParams = {
+          search: searchQuery || undefined,
+          category: categoryId && !isSearchPage ? categoryId : undefined,
+          limit: 1000,
+        };
+        console.log('Fetching products with params:', requestParams);
+
+        // Завантажуємо всі продукти з урахуванням пошукового запиту та категорії
         const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
-          params: {
-            limit: 1000, // Велике значення, щоб отримати всі продукти
-          },
+          params: requestParams,
         });
+
+        // Логування отриманих даних
+        console.log('API response:', {
+          productCount: response.data.products.length,
+          products: response.data.products.map(p => ({
+            id: p.id,
+            name: p.name,
+            category_id: p.category_id,
+            category_name: p.category_name,
+          })),
+        });
+
         let productsData = response.data.products || [];
 
-        // Фільтруємо продукти за категорією, якщо не на сторінці пошуку
-        let filteredProductsData = productsData;
-        if (categoryId && !isSearchPage) {
-          filteredProductsData = productsData.filter(
-            product => product.category_id === categoryId
-          );
-        }
-
-        // Ініціалізація фільтрів на основі відфільтрованих продуктів
+        // Ініціалізація фільтрів на основі отриманих продуктів
         const brandCounts = {};
         const typeCounts = {};
         const categoryCounts = {};
         const allVolumes = new Set();
         const priceBuckets = new Set();
-        filteredProductsData.forEach(product => {
+        productsData.forEach(product => {
           const brand = product.brand_name;
           const type = product.feature_type;
           const category = product.category_name;
@@ -321,7 +339,7 @@ function ProductList({ searchTerm }) {
           }
         });
 
-        const allBrands = [...new Set(filteredProductsData.map(p => p.brand_name))].sort(
+        const allBrands = [...new Set(productsData.map(p => p.brand_name))].sort(
           (a, b) => (brandCounts[b] || 0) - (brandCounts[a] || 0)
         );
         const allPriceRanges = [
@@ -342,7 +360,7 @@ function ProductList({ searchTerm }) {
           const numB = parseFloat(b.replace(/[^0-9.]/g, '')) || 0;
           return numA - numB;
         });
-        const allTypes = [...new Set(filteredProductsData.map(p => p.feature_type).filter(Boolean))].sort(
+        const allTypes = [...new Set(productsData.map(p => p.feature_type).filter(Boolean))].sort(
           (a, b) => (typeCounts[b] || 0) - (typeCounts[a] || 0)
         );
         const allCategories = isSearchPage
@@ -360,9 +378,9 @@ function ProductList({ searchTerm }) {
         });
 
         setAllProducts(productsData);
-        setFilteredProducts(filteredProductsData);
-        setTotalProducts(filteredProductsData.length);
-        setPreviewProductCount(filteredProductsData.length);
+        setFilteredProducts(productsData); // Спочатку встановлюємо, але useEffect нижче оновить
+        setTotalProducts(productsData.length);
+        setPreviewProductCount(productsData.length);
         setCurrentPage(1);
         setStartPage(1);
         setLoadMorePages(1);
@@ -434,70 +452,165 @@ function ProductList({ searchTerm }) {
     allProducts,
     isLoading,
     calculatePreviewProducts,
-    updateDisabledFilters
+    updateDisabledFilters,
   ]);
 
   // Клієнтська фільтрація при зміні застосованих фільтрів
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && allProducts.length > 0) {
+      console.log('Starting client-side filtering:', {
+        allProductsCount: allProducts.length,
+        searchQuery,
+        categoryId,
+        isSearchPage,
+        appliedFilters,
+        customPriceFrom,
+        customPriceTo,
+      });
+
       let filtered = [...allProducts];
 
       // Фільтр за пошуковим запитом
       if (searchQuery) {
-        filtered = filtered.filter(product =>
-          product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        console.log('Applying searchQuery filter:', { searchQuery });
+        filtered = filtered.filter(product => {
+          const matches = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (does not match "${searchQuery}")`);
+          }
+          return matches;
+        });
+        console.log('After searchQuery filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       }
 
       // Фільтр за категорією
       if (categoryId && !isSearchPage) {
-        filtered = filtered.filter(product => product.category_id === categoryId);
+        console.log('Applying categoryId filter:', { categoryId });
+        filtered = filtered.filter(product => {
+          const matches = product.category_id === categoryId;
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (category_id ${product.category_id} does not match "${categoryId}")`);
+          }
+          return matches;
+        });
+        console.log('After categoryId filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       } else if (appliedFilters.categories.length > 0 && isSearchPage) {
-        filtered = filtered.filter(product =>
-          appliedFilters.categories.includes(product.category_name)
-        );
+        console.log('Applying categories filter:', { categories: appliedFilters.categories });
+        filtered = filtered.filter(product => {
+          const matches = appliedFilters.categories.includes(product.category_name);
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (category_name ${product.category_name} not in ${appliedFilters.categories})`);
+          }
+          return matches;
+        });
+        console.log('After categories filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       }
 
       // Фільтр за брендами
       if (appliedFilters.brands.length > 0) {
-        filtered = filtered.filter(product =>
-          appliedFilters.brands.includes(product.brand_name)
-        );
+        console.log('Applying brands filter:', { brands: appliedFilters.brands });
+        filtered = filtered.filter(product => {
+          const matches = appliedFilters.brands.includes(product.brand_name);
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (brand ${product.brand_name} not in ${appliedFilters.brands})`);
+          }
+          return matches;
+        });
+        console.log('After brands filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       }
 
       // Фільтр за ціною
       if (customPriceFrom !== '' && customPriceTo !== '') {
         const priceFrom = parseFloat(customPriceFrom);
         const priceTo = parseFloat(customPriceTo);
+        console.log('Applying custom price filter:', { priceFrom, priceTo });
         filtered = filtered.filter(product => {
           const minPrice = getMinPrice(product.store_prices);
-          return minPrice >= priceFrom && minPrice <= priceTo;
+          const matches = minPrice >= priceFrom && minPrice <= priceTo;
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (price ${minPrice} not in range ${priceFrom}-${priceTo})`);
+          }
+          return matches;
+        });
+        console.log('After custom price filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
         });
       } else if (appliedFilters.priceRanges.length > 0) {
+        console.log('Applying priceRanges filter:', { priceRanges: appliedFilters.priceRanges });
         filtered = filtered.filter(product => {
           const minPrice = getMinPrice(product.store_prices);
-          return appliedFilters.priceRanges.some(range => {
+          const matches = appliedFilters.priceRanges.some(range => {
             const [min, max] = range.includes('+')
               ? [1000, Infinity]
               : range.split('-').map(Number);
             return minPrice >= min && (max === Infinity || minPrice <= max);
           });
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (price ${minPrice} not in ranges ${appliedFilters.priceRanges})`);
+          }
+          return matches;
+        });
+        console.log('After priceRanges filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
         });
       }
 
       // Фільтр за об’ємами
       if (appliedFilters.volumes.length > 0) {
-        filtered = filtered.filter(product =>
-          appliedFilters.volumes.includes(product.volume)
-        );
+        console.log('Applying volumes filter:', { volumes: appliedFilters.volumes });
+        filtered = filtered.filter(product => {
+          const matches = appliedFilters.volumes.includes(product.volume);
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (volume ${product.volume} not in ${appliedFilters.volumes})`);
+          }
+          return matches;
+        });
+        console.log('After volumes filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       }
 
       // Фільтр за типами
       if (appliedFilters.types.length > 0) {
-        filtered = filtered.filter(product =>
-          appliedFilters.types.includes(product.feature_type)
-        );
+        console.log('Applying types filter:', { types: appliedFilters.types });
+        filtered = filtered.filter(product => {
+          const matches = appliedFilters.types.includes(product.feature_type);
+          if (!matches) {
+            console.log(`Excluding product: ${product.name} (type ${product.feature_type} not in ${appliedFilters.types})`);
+          }
+          return matches;
+        });
+        console.log('After types filter:', {
+          count: filtered.length,
+          products: filtered.map(p => p.name),
+        });
       }
+
+      // Логування фінального результату
+      console.log('Final filtered products:', {
+        count: filtered.length,
+        products: filtered.map(p => ({
+          id: p.id,
+          name: p.name,
+          category_id: p.category_id,
+          category_name: p.category_name,
+        })),
+      });
 
       setFilteredProducts(filtered);
       setTotalProducts(filtered.length);
@@ -796,28 +909,35 @@ function ProductList({ searchTerm }) {
           {isSearchPage && searchQuery && (
             <div className="filter-section">
               <h4>Категорія</h4>
-              <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['categories'] = el)}>
+              <div
+                className="filter-items-container"
+                ref={(el) => (filterItemsRefs.current['categories'] = el)}
+              >
                 <div className="filter-items filter-items-single-column">
-                  {getVisibleItems(filters.categories, 'categories').map((category, index) => {
-                    const isDisabled = disabledFilters.categories.has(category);
-                    return (
-                      <label
-                        key={index}
-                        className={isDisabled ? 'disabled' : ''}
-                        ref={(el) => (filterRefs.current[`categories-${category}`] = el)}
-                      >
-                        <input
-                          type="checkbox"
-                          name="category"
-                          value={category}
-                          checked={selectedFilters.categories?.includes(category) || false}
-                          onChange={() => handleFilterChange('categories', category)}
-                          disabled={isDisabled}
-                        />
-                        {categoryNames[category] || category}
-                      </label>
-                    );
-                  })}
+                  {getVisibleItems(filters.categories, 'categories').map(
+                    (category, index) => {
+                      const isDisabled = disabledFilters.categories.has(category);
+                      return (
+                        <label
+                          key={index}
+                          className={isDisabled ? 'disabled' : ''}
+                          ref={(el) => (filterRefs.current[`categories-${category}`] = el)}
+                        >
+                          <input
+                            type="checkbox"
+                            name="category"
+                            value={category}
+                            checked={
+                              selectedFilters.categories?.includes(category) || false
+                            }
+                            onChange={() => handleFilterChange('categories', category)}
+                            disabled={isDisabled}
+                          />
+                          {categoryNames[category] || category}
+                        </label>
+                      );
+                    }
+                  )}
                 </div>
               </div>
               {filters.categories.length > 6 && (
@@ -841,7 +961,10 @@ function ProductList({ searchTerm }) {
               value={brandSearch}
               onChange={handleBrandSearch}
             />
-            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['brands'] = el)}>
+            <div
+              className="filter-items-container"
+              ref={(el) => (filterItemsRefs.current['brands'] = el)}
+            >
               <div className="filter-items">
                 {getVisibleItems(filters.brands, 'brands').map((brand, index) => {
                   const isDisabled = disabledFilters.brands.has(brand);
@@ -896,28 +1019,39 @@ function ProductList({ searchTerm }) {
                 className="price-input"
               />
             </div>
-            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['priceRanges'] = el)}>
+            <div
+              className="filter-items-container"
+              ref={(el) => (filterItemsRefs.current['priceRanges'] = el)}
+            >
               <div className="filter-items">
-                {getVisibleItems(filters.priceRanges, 'priceRanges').map((range, index) => {
-                  const isDisabled = disabledFilters.priceRanges.has(range.label);
-                  return (
-                    <label
-                      key={index}
-                      className={isDisabled ? 'disabled' : ''}
-                      ref={(el) => (filterRefs.current[`priceRanges-${range.label}`] = el)}
-                    >
-                      <input
-                        type="checkbox"
-                        name="priceRange"
-                        value={range.label}
-                        checked={selectedFilters.priceRanges?.includes(range.label) || false}
-                        onChange={() => handleFilterChange('priceRanges', range.label)}
-                        disabled={isDisabled}
-                      />
-                      {range.label}
-                    </label>
-                  );
-                })}
+                {getVisibleItems(filters.priceRanges, 'priceRanges').map(
+                  (range, index) => {
+                    const isDisabled = disabledFilters.priceRanges.has(range.label);
+                    return (
+                      <label
+                        key={index}
+                        className={isDisabled ? 'disabled' : ''}
+                        ref={(el) =>
+                          (filterRefs.current[`priceRanges-${range.label}`] = el)
+                        }
+                      >
+                        <input
+                          type="checkbox"
+                          name="priceRange"
+                          value={range.label}
+                          checked={
+                            selectedFilters.priceRanges?.includes(range.label) || false
+                          }
+                          onChange={() =>
+                            handleFilterChange('priceRanges', range.label)
+                          }
+                          disabled={isDisabled}
+                        />
+                        {range.label}
+                      </label>
+                    );
+                  }
+                )}
               </div>
             </div>
             {filters.priceRanges.length > 12 && (
@@ -933,7 +1067,10 @@ function ProductList({ searchTerm }) {
           {/* Volume filter */}
           <div className="filter-section">
             <h4>Об’єм</h4>
-            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['volumes'] = el)}>
+            <div
+              className="filter-items-container"
+              ref={(el) => (filterItemsRefs.current['volumes'] = el)}
+            >
               <div className="filter-items">
                 {getVisibleItems(filters.volumes, 'volumes').map((volume, index) => {
                   const isDisabled = disabledFilters.volumes.has(volume);
@@ -970,7 +1107,10 @@ function ProductList({ searchTerm }) {
           {/* Type filter */}
           <div className="filter-section">
             <h4>Тип</h4>
-            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['types'] = el)}>
+            <div
+              className="filter-items-container"
+              ref={(el) => (filterItemsRefs.current['types'] = el)}
+            >
               <div className="filter-items filter-items-single-column">
                 {getVisibleItems(filters.types, 'types').map((type, index) => {
                   const isDisabled = disabledFilters.types.has(type);
@@ -1012,9 +1152,16 @@ function ProductList({ searchTerm }) {
               onClick={applyFilters}
               style={{
                 top: filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
-                  ? `${filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].getBoundingClientRect().top -
-                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].closest('.filters').getBoundingClientRect().top +
-                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].offsetHeight / 2}px`
+                  ? `${
+                      filterRefs.current[
+                        `${activeFilter.type}-${activeFilter.value}`
+                      ].getBoundingClientRect().top -
+                      filterRefs.current[
+                        `${activeFilter.type}-${activeFilter.value}`
+                      ].closest('.filters').getBoundingClientRect().top +
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
+                        .offsetHeight / 2
+                    }px`
                   : '0px',
               }}
             >

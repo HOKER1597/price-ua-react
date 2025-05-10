@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import products from '../data/products';
+import axios from 'axios';
 import SearchResults from './SearchResults';
 import './Header.css';
 
@@ -8,63 +8,75 @@ function Header({ setSearchTerm }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Handle search submission
   const handleSearch = useCallback(() => {
     if (searchQuery.trim()) {
       setSearchTerm(searchQuery);
       navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
       setShowResults(false);
+      setIsLoading(false);
     }
   }, [searchQuery, setSearchTerm, navigate]);
 
-  const handleInputChange = (e) => {
+  // Handle input change and fetch search results from the database
+  const handleInputChange = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
+
     if (query.trim()) {
-      const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(query.toLowerCase())
-      );
-      const groupedResults = filteredProducts.reduce((acc, product) => {
-        const category = acc.find((cat) => cat.category === product.category);
-        if (category) {
-          category.products.push(product);
-          category.count += 1;
-        } else {
-          acc.push({ category: product.category, products: [product], count: 1 });
-        }
-        return acc;
-      }, []).sort((a, b) => b.count - a.count);
-      setSearchResults(groupedResults);
-      setShowResults(true);
+      setIsLoading(true);
+      try {
+        const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
+          params: { search: query },
+        });
+
+        setSearchResults(response.data.groupedResults || []);
+        setShowResults(true);
+      } catch (error) {
+        console.error('Помилка пошуку:', error);
+        setSearchResults([]);
+        setShowResults(false);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       setSearchResults([]);
       setShowResults(false);
+      setIsLoading(false);
     }
   };
 
+  // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
+  // Clear search input and results
   const handleClearSearch = () => {
     setSearchQuery('');
     setSearchResults([]);
     setShowResults(false);
-    setSearchTerm(''); // Clear search term to avoid stale state
+    setSearchTerm('');
+    setIsLoading(false);
   };
 
+  // Close search results
   const handleCloseResults = () => {
     setShowResults(false);
   };
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       setSearchResults([]);
       setShowResults(false);
+      setIsLoading(false);
     };
   }, []);
 
@@ -85,22 +97,42 @@ function Header({ setSearchTerm }) {
               className="search-input"
             />
             {searchQuery && (
-              <svg
-                className="clear-icon"
-                onClick={handleClearSearch}
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#555"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <>
+                {isLoading && (
+                  <svg
+                    className="loading-circle"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="#555" strokeWidth="4" />
+                    <path
+                      d="M12 2a10 10 0 0 1 10 10"
+                      fill="none"
+                      stroke="#0288d1"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                )}
+                <svg
+                  className="clear-icon"
+                  onClick={handleClearSearch}
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#555"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </>
             )}
           </div>
           <button onClick={handleSearch} className="search-button">

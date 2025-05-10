@@ -33,9 +33,23 @@
   border-radius: 5px;
 }
 
+.search-input-wrapper {
+  position: relative;
+}
+
+.loading-circle {
+  position: absolute;
+  right: 30px; /* Position to the left of clear-icon */
+  top: 10px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
 .clear-icon {
   position: absolute;
-  right: 120px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -71,4 +85,10 @@
 .profile span {
   font-size: 16px;
   color: white;
+}
+
+/* Animation for the loading circle */
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
 }
