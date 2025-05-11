@@ -9,6 +9,7 @@ function Header({ setSearchTerm }) {
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResultsUpdated, setIsResultsUpdated] = useState(false);
   const navigate = useNavigate();
 
   // Handle search submission
@@ -19,6 +20,7 @@ function Header({ setSearchTerm }) {
       setSearchQuery('');
       setShowResults(false);
       setIsLoading(false);
+      setIsResultsUpdated(false);
     }
   }, [searchQuery, setSearchTerm, navigate]);
 
@@ -29,6 +31,7 @@ function Header({ setSearchTerm }) {
 
     if (query.trim()) {
       setIsLoading(true);
+      setIsResultsUpdated(false); // Reset animation trigger
       try {
         const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: { search: query },
@@ -36,10 +39,12 @@ function Header({ setSearchTerm }) {
 
         setSearchResults(response.data.groupedResults || []);
         setShowResults(true);
+        setIsResultsUpdated(true); // Trigger animation after results are updated
       } catch (error) {
         console.error('Помилка пошуку:', error);
         setSearchResults([]);
         setShowResults(false);
+        setIsResultsUpdated(false);
       } finally {
         setIsLoading(false);
       }
@@ -47,6 +52,7 @@ function Header({ setSearchTerm }) {
       setSearchResults([]);
       setShowResults(false);
       setIsLoading(false);
+      setIsResultsUpdated(false);
     }
   };
 
@@ -64,11 +70,13 @@ function Header({ setSearchTerm }) {
     setShowResults(false);
     setSearchTerm('');
     setIsLoading(false);
+    setIsResultsUpdated(false);
   };
 
   // Close search results
   const handleCloseResults = () => {
     setShowResults(false);
+    setIsResultsUpdated(false);
   };
 
   // Cleanup on unmount
@@ -77,6 +85,7 @@ function Header({ setSearchTerm }) {
       setSearchResults([]);
       setShowResults(false);
       setIsLoading(false);
+      setIsResultsUpdated(false);
     };
   }, []);
 
@@ -143,6 +152,8 @@ function Header({ setSearchTerm }) {
               results={searchResults}
               searchQuery={searchQuery}
               onClose={handleCloseResults}
+              isResultsUpdated={isResultsUpdated}
+              isLoading={isLoading}
             />
           )}
         </div>

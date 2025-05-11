@@ -43,7 +43,7 @@ export const categoryNames = {
   hairloss: 'Засоби проти випадіння волосся',
 };
 
-function SearchResults({ results, searchQuery, onClose }) {
+function SearchResults({ results, searchQuery, onClose, isResultsUpdated, isLoading }) {
   const resultsRef = useRef(null);
   const [isInitialOpen, setIsInitialOpen] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
@@ -57,9 +57,9 @@ function SearchResults({ results, searchQuery, onClose }) {
         setTimeout(() => {
           setIsClosing(false);
           onClose();
-          setIsInitialOpen(true); // Reset for next open
-          setShowText(false); // Reset text visibility
-        }, 200); // Match the fadeOut animation duration
+          setIsInitialOpen(true);
+          setShowText(false);
+        }, 200);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -68,29 +68,29 @@ function SearchResults({ results, searchQuery, onClose }) {
     };
   }, [onClose]);
 
-  // Trigger text animation when results change or popup opens
+  // Trigger text animation only when results are updated and not loading
   useEffect(() => {
-    if (results.length > 0) {
-      // Delay text rendering slightly to sync with popup animation
+    if (isResultsUpdated && !isLoading && results.length > 0) {
+      setShowText(false); // Reset to trigger animation
       const timer = setTimeout(() => {
         setShowText(true);
-      }, 50); // Small delay to ensure popup starts animating first
+      }, 50); // Small delay to sync with popup animation
       return () => clearTimeout(timer);
     } else {
       setShowText(false);
     }
-  }, [results]);
+  }, [isResultsUpdated, isLoading, results]);
 
   return (
     <div
       className={`search-results ${isInitialOpen ? 'initial-open' : ''} ${isClosing ? 'closing' : ''}`}
       ref={resultsRef}
     >
-      {showText && results.slice(0, 2).map((category, index) => (
-        <div key={index} className="search-category">
+      {results.slice(0, 2).map((category, index) => (
+        <div key={`${category.category}-${searchQuery}`} className="search-category">
           <Link
             to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
-            className="category-title animate-text"
+            className={`category-title ${showText && !isLoading ? 'animate-text' : ''}`}
             onClick={() => {
               setIsClosing(true);
               setTimeout(() => {
@@ -106,10 +106,10 @@ function SearchResults({ results, searchQuery, onClose }) {
           </Link>
           <ul className="product-list">
             {category.products.slice(0, 5).map((product, idx) => (
-              <li key={product.id}>
+              <li key={`${product.id}-${searchQuery}`}>
                 <Link
                   to={`/product/${product.id}`}
-                  className="product-link animate-text"
+                  className={`product-link ${showText && !isLoading ? 'animate-text' : ''}`}
                   onClick={() => {
                     setIsClosing(true);
                     setTimeout(() => {
@@ -129,7 +129,7 @@ function SearchResults({ results, searchQuery, onClose }) {
           {category.products.length > 5 && (
             <Link
               to={`/category/${category.category}?search=${encodeURIComponent(searchQuery)}`}
-              className="more-products animate-text"
+              className={`more-products ${showText && !isLoading ? 'animate-text' : ''}`}
               onClick={() => {
                 setIsClosing(true);
                 setTimeout(() => {
@@ -146,10 +146,10 @@ function SearchResults({ results, searchQuery, onClose }) {
           )}
         </div>
       ))}
-      {showText && results.length > 0 && (
+      {results.length > 0 && (
         <Link
           to={`/search?query=${encodeURIComponent(searchQuery)}`}
-          className="view-all animate-text"
+          className={`view-all ${showText && !isLoading ? 'animate-text' : ''}`}
           onClick={() => {
             setIsClosing(true);
             setTimeout(() => {
