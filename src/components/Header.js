@@ -315,9 +315,9 @@ function Header({ setSearchTerm }) {
               </button>
             </div>
           ) : (
-            <span to="/login" className="login-link">
+            <Link to="/login" className="login-link">
               Увійти
-            </span>
+            </Link>
           )}
         </div>
       </div>

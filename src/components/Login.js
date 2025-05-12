@@ -11,11 +11,34 @@ function Login() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [animate, setAnimate] = useState(false);
+  const [fieldAnimations, setFieldAnimations] = useState({
+    identifier: false,
+    password: false,
+    nickname: false,
+    email: false,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
     setAnimate(true);
-  }, []);
+    // Ініціалізація анімацій полів
+    setFieldAnimations({
+      identifier: false,
+      password: false,
+      nickname: false,
+      email: false,
+    });
+
+    // Запуск анімацій полів з затримкою
+    const timers = [
+      setTimeout(() => setFieldAnimations(prev => ({ ...prev, identifier: true })), 100),
+      setTimeout(() => setFieldAnimations(prev => ({ ...prev, password: true })), 200),
+      setTimeout(() => setFieldAnimations(prev => ({ ...prev, nickname: true })), 300),
+      setTimeout(() => setFieldAnimations(prev => ({ ...prev, email: true })), 400),
+    ];
+
+    return () => timers.forEach(clearTimeout);
+  }, [isLogin]);
 
   const handleLogin = async () => {
     try {
@@ -26,6 +49,8 @@ function Login() {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/');
+      // Оновлення сторінки після перенаправлення
+      setTimeout(() => window.location.reload(), 100);
     } catch (err) {
       setError(err.response?.data?.error || 'Помилка сервера');
     }
@@ -52,20 +77,36 @@ function Login() {
     }
   };
 
+  const handleSwitch = (newIsLogin) => {
+    // Скидання анімацій перед перемиканням
+    setAnimate(false);
+    setFieldAnimations({
+      identifier: false,
+      password: false,
+      nickname: false,
+      email: false,
+    });
+    // Затримка для завершення рендерингу перед перезапуском анімації
+    setTimeout(() => {
+      setIsLogin(newIsLogin);
+      setAnimate(true);
+    }, 50);
+  };
+
   return (
     <div className="auth-page">
       <div className={`auth-container ${animate ? 'animate' : ''}`}>
-        <h2 className="auth-title">{isLogin ? 'Увійти в аккаунт' : 'Створити аккаунт'}</h2>
-        {error && <p className="error">{error}</p>}
         {isLogin ? (
           <>
+            <h2 className="auth-title">Увійти в аккаунт</h2>
+            {error && <p className="error">{error}</p>}
             <label className="auth-label">Нікнейм або пошта</label>
             <input
               type="text"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="auth-input"
+              className={`auth-input ${fieldAnimations.identifier ? 'field-animate' : ''}`}
               placeholder="Введіть нікнейм або пошту"
             />
             <label className="auth-label">Пароль</label>
@@ -74,25 +115,27 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="auth-input"
+              className={`auth-input ${fieldAnimations.password ? 'field-animate' : ''}`}
               placeholder="Введіть пароль"
             />
             <button onClick={handleLogin} className="auth-button">
               Увійти
             </button>
-            <p className="auth-switch" onClick={() => setIsLogin(false)}>
+            <p className="auth-switch" onClick={() => handleSwitch(false)}>
               Створити аккаунт
             </p>
           </>
         ) : (
           <>
+            <h2 className="auth-title">Створити аккаунт</h2>
+            {error && <p className="error">{error}</p>}
             <label className="auth-label">Нікнейм</label>
             <input
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="auth-input"
+              className={`auth-input ${fieldAnimations.nickname ? 'field-animate' : ''}`}
               placeholder="Введіть нікнейм"
             />
             <label className="auth-label">Пошта</label>
@@ -101,7 +144,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="auth-input"
+              className={`auth-input ${fieldAnimations.email ? 'field-animate' : ''}`}
               placeholder="Введіть пошту"
             />
             <label className="auth-label">Пароль</label>
@@ -110,13 +153,13 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="auth-input"
+              className={`auth-input ${fieldAnimations.password ? 'field-animate' : ''}`}
               placeholder="Введіть пароль"
             />
             <button onClick={handleRegister} className="auth-button">
               Створити аккаунт
             </button>
-            <p className="auth-switch" onClick={() => setIsLogin(true)}>
+            <p className="auth-switch" onClick={() => handleSwitch(true)}>
               Увійти
             </p>
           </>
