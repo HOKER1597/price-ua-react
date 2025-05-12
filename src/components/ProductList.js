@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import './ProductList.css';
-import { categoryNames } from './SearchResults';
+import { categoryNames } from './Header.js';
 
 function ProductList({ searchTerm }) {
   const { categoryId } = useParams();

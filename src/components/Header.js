@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Header.css';
 
-const categoryNames = {
+export const categoryNames = {
   shampoos: 'Шампуні',
   facecream: 'Креми для обличчя',
   facemask: 'Маски для обличчя',
