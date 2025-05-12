@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Header.css';
 
@@ -54,15 +54,27 @@ function Header({ setSearchTerm }) {
   const [isClosing, setIsClosing] = useState(false);
   const [showText, setShowText] = useState(false);
   const [user, setUser] = useState(null);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
   const resultsRef = useRef(null);
+  const contextMenuRef = useRef(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+        setShowContextMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleSearch = useCallback(() => {
@@ -158,7 +170,12 @@ function Header({ setSearchTerm }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setShowContextMenu(false);
     navigate('/');
+  };
+
+  const toggleContextMenu = () => {
+    setShowContextMenu(!showContextMenu);
   };
 
   useEffect(() => {
@@ -309,10 +326,28 @@ function Header({ setSearchTerm }) {
           </svg>
           {user ? (
             <div className="user-profile">
-              <span>{user.nickname}</span>
-              <button onClick={handleLogout} className="logout-button">
-                Вийти
-              </button>
+              <span onClick={toggleContextMenu} className="nickname" style={{ cursor: 'pointer' }}>
+                {user.nickname}
+              </span>
+              {showContextMenu && (
+                <div className="context-menu" ref={contextMenuRef}>
+                  <div
+                    className="context-menu-item"
+                    onClick={() => {
+                      navigate('/account');
+                      setShowContextMenu(false);
+                    }}
+                  >
+                    Аккаунт
+                  </div>
+                  <div className="context-menu-item" onClick={() => setShowContextMenu(false)}>
+                    Бажане
+                  </div>
+                  <div className="context-menu-item" onClick={handleLogout}>
+                    Вийти
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <Link to="/login" className="login-link">

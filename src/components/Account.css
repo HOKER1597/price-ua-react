@@ -1,0 +1,88 @@
+.account-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(to bottom, #f0f4f8, #d9e2ec);
+  padding: 20px;
+}
+
+.account-container {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.account-avatar {
+  flex-shrink: 0;
+}
+
+.account-nickname {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-label {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.account-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.account-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #0288d1;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.account-button:hover {
+  background-color: #0277bd;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.success {
+  color: #388e3c;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 15px;
+}
