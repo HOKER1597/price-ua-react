@@ -2,291 +2,479 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import './CategorySubcategories.css';
 
-// Дані підкатегорій на основі структури EVA.UA
+// Дані підкатегорій на основі структури з docx файлу
 export const subcategoriesData = {
   makeup: [
-    {
-      category: 'Очі',
-      categoryId: 'eyes',
-      items: [
-        { id: 'mascara', name: 'Туш для вій' },
-        { id: 'eyeliner', name: 'Підводка для очей' },
-        { id: 'eyeshadow', name: 'Тіні для повік' },
-        { id: 'eyebrow', name: 'Засоби для брів' },
-        { id: 'false-lashes', name: 'Накладні вії' },
-      ],
-    },
     {
       category: 'Обличчя',
       categoryId: 'face',
       items: [
-        { id: 'foundation', name: 'Тональний крем' },
-        { id: 'bb-cream', name: 'ББ-крем' },
-        { id: 'concealer', name: 'Консилер' },
-        { id: 'powder', name: 'Пудра' },
-        { id: 'blush', name: 'Рум’яна' },
-        { id: 'highlighter', name: 'Хайлайтер' },
+        { id: 'foundation', name: 'Тональні основи (рідкі, компактні, стіки)' },
+        { id: 'concealer', name: 'Консилери (під очі, точкові)' },
+        { id: 'powder', name: 'Пудри (розсипчасті, компактні)' },
+        { id: 'blush', name: 'Рум’яна (кремові, сухі)' },
+        { id: 'highlighter', name: 'Хайлайтери (пудрові, рідкі)' },
+        { id: 'bronzer', name: 'Бронзери' },
+        { id: 'primer', name: 'Бази/праймери (матуючі, зволожуючі, з ефектом сяяння)' },
+      ],
+    },
+    {
+      category: 'Очі',
+      categoryId: 'eyes',
+      items: [
+        { id: 'eyeshadow', name: 'Тіні для повік (одиночні, палітри, кремові)' },
+        { id: 'eyeliner', name: 'Підводки (рідкі, гелеві, фломастери)' },
+        { id: 'eyepencil', name: 'Олівці для очей' },
+        { id: 'mascara', name: 'Туші (обʼєм, подовження, водостійкі)' },
+        { id: 'eyeshadow-base', name: 'Бази під тіні' },
+        { id: 'eyebrow', name: 'Засоби для брів (олівці, гелі, тіні, фіксатори, маркери, сироватки)' },
       ],
     },
     {
       category: 'Губи',
       categoryId: 'lips',
       items: [
-        { id: 'lipstick', name: 'Помада' },
-        { id: 'lipgloss', name: 'Блиск для губ' },
-        { id: 'lipliner', name: 'Олівець для губ' },
+        { id: 'lipstick', name: 'Помади (матові, глянцеві, сатинові)' },
+        { id: 'lipgloss', name: 'Блиски' },
+        { id: 'lipliner', name: 'Олівці (контурні, моделюючі)' },
+        { id: 'lipbalm', name: 'Бальзами (з SPF, кольорові)' },
+        { id: 'tint', name: 'Тінти (гель, крем)' },
       ],
     },
     {
-      category: 'Нігті',
-      categoryId: 'nails',
+      category: 'Інструменти',
+      categoryId: 'tools',
       items: [
-        { id: 'nail-polish', name: 'Лак для нігтів' },
-        { id: 'nail-care', name: 'Догляд за нігтями' },
-        { id: 'gel-polish', name: 'Гель-лак' },
-      ],
-    },
-    {
-      category: 'Зняття макіяжу',
-      categoryId: 'makeup-removal',
-      items: [
-        { id: 'micellar-water', name: 'Міцелярна вода' },
-        { id: 'makeup-remover', name: 'Засоби для зняття макіяжу' },
-        { id: 'cleansing-oil', name: 'Гідрофільна олія' },
+        { id: 'brushes', name: 'Пензлі (для тону, пудри, очей)' },
+        { id: 'sponges', name: 'Спонжі' },
+        { id: 'brow-brushes', name: 'Щіточки для брів' },
+        { id: 'applicators', name: 'Аплікатори' },
+        { id: 'mirrors', name: 'Дзеркала' },
+        { id: 'organizers', name: 'Органайзери' },
+        { id: 'lip-brushes', name: 'Кисті для губ' },
+        { id: 'accessories', name: 'Аксесуари для нанесення макіяжу' },
       ],
     },
   ],
-  face: [
+  skincare: [
     {
       category: 'Очищення',
       categoryId: 'cleansing',
       items: [
-        { id: 'cleansing-gel', name: 'Гель для вмивання' },
+        { id: 'cleansing-gel', name: 'Гелі' },
+        { id: 'cleansing-foam', name: 'Пінки' },
         { id: 'micellar-water', name: 'Міцелярна вода' },
-        { id: 'cleansing-foam', name: 'Пінка для вмивання' },
-        { id: 'scrub', name: 'Скраб' },
+        { id: 'cleansing-cream', name: 'Креми для вмивання' },
+        { id: 'hydrophilic-oil', name: 'Гідрофільні олії' },
+        { id: 'peeling-pads', name: 'Пілінг-пади' },
+      ],
+    },
+    {
+      category: 'Тонізація',
+      categoryId: 'toning',
+      items: [
+        { id: 'toner', name: 'Тоніки' },
+        { id: 'essence', name: 'Есенції' },
+        { id: 'hydrolat', name: 'Гідролати' },
+        { id: 'mist', name: 'Місти' },
+      ],
+    },
+    {
+      category: 'Сироватки та активи',
+      categoryId: 'serums',
+      items: [
+        { id: 'vitamin-c', name: 'З вітаміном С' },
+        { id: 'niacinamide', name: 'Ніацинамідом' },
+        { id: 'hyaluronic-acid', name: 'Гіалуроновою кислотою' },
+        { id: 'peptides', name: 'Пептидами' },
+        { id: 'retinol', name: 'Ретинолом' },
+        { id: 'aha-bha', name: 'AHA/BHA кислотами' },
       ],
     },
     {
       category: 'Зволоження',
       categoryId: 'moisturizing',
       items: [
-        { id: 'moisturizer', name: 'Зволожувальний крем' },
-        { id: 'serum', name: 'Сироватка' },
-        { id: 'face-mask', name: 'Маска для обличчя' },
+        { id: 'moisturizer', name: 'Креми' },
+        { id: 'fluid', name: 'Флюїди' },
+        { id: 'gel', name: 'Гелі' },
+        { id: 'milk', name: 'Молочко' },
       ],
     },
     {
-      category: 'Антивіковий догляд',
-      categoryId: 'anti-aging',
+      category: 'Живлення',
+      categoryId: 'nourishment',
       items: [
-        { id: 'anti-aging-cream', name: 'Антивіковий крем' },
-        { id: 'eye-cream', name: 'Крем для зони навколо очей' },
-        { id: 'night-cream', name: 'Нічний крем' },
+        { id: 'masks', name: 'Маски (тканинні, кремові, нічні)' },
+        { id: 'face-oil', name: 'Олії для обличчя' },
+        { id: 'balm', name: 'Бальзами' },
+        { id: 'eye-care', name: 'Зона навколо очей: Креми, Гелі, Патчі' },
+        { id: 'spf', name: 'Захист: SPF (креми, спреї, флюїди)' },
+        { id: 'anti-pollution', name: 'Антиполюшн' },
       ],
     },
     {
-      category: 'Спеціальний догляд',
-      categoryId: 'special-care',
+      category: 'Лікування',
+      categoryId: 'treatment',
       items: [
-        { id: 'acne-treatment', name: 'Засоби від акне' },
-        { id: 'peeling', name: 'Пілінги' },
-        { id: 'sun-protection', name: 'Сонцезахисні засоби' },
+        { id: 'acne-treatment', name: 'Проти акне' },
+        { id: 'anti-aging', name: 'Антивіковий догляд' },
+        { id: 'soothing', name: 'Заспокійливі засоби' },
+        { id: 'whitening', name: 'Відбілювання' },
+        { id: 'cc-bb-cream', name: 'СС/ВВ креми' },
+      ],
+    },
+    {
+      category: 'Губи',
+      categoryId: 'lip-care',
+      items: [
+        { id: 'lip-scrub', name: 'Скраби' },
+        { id: 'lip-balm', name: 'Бальзами' },
+        { id: 'lip-mask', name: 'Маски' },
+      ],
+    },
+    {
+      category: 'Тіло',
+      categoryId: 'body',
+      items: [
+        { id: 'shower-gel', name: 'Гелі для душу' },
+        { id: 'body-scrub', name: 'Скраби' },
+        { id: 'body-lotion', name: 'Лосьйони' },
+        { id: 'body-oil', name: 'Олії' },
+        { id: 'body-butter', name: 'Батери' },
+        { id: 'deodorant', name: 'Дезодоранти (антиперспіранти, натуральні)' },
+        { id: 'post-epilation', name: 'Засоби після епіляції' },
+        { id: 'anti-cellulite', name: 'Антицелюлітні креми' },
+        { id: 'tightening-cream', name: 'Креми з ефектом підтягнення' },
+        { id: 'body-spf', name: 'SPF для тіла' },
+      ],
+    },
+    {
+      category: 'Руки та ноги',
+      categoryId: 'hands-feet',
+      items: [
+        { id: 'hand-foot-cream', name: 'Креми (зволожуючі, живильні)' },
+        { id: 'hand-foot-mask', name: 'Маски' },
+        { id: 'cuticle-care', name: 'Засоби для кутикули' },
+        { id: 'glass-file', name: 'Скляні пилочки' },
+        { id: 'crack-cream', name: 'Креми від тріщин' },
+        { id: 'anti-sweat', name: 'Антипітливість' },
       ],
     },
   ],
-  hair: [
+  haircare: [
     {
-      category: 'Шампуні',
+      category: 'Шампуні (для обʼєму, проти лупи, для фарбованого волосся)',
       categoryId: 'shampoos',
-      items: [
-        { id: 'shampoo-dry', name: 'Для сухого волосся', type: 'Для сухого волосся' },
-        { id: 'shampoo-oily', name: 'Для жирного волосся', type: 'Для жирного волосся' },
-        { id: 'shampoo-colored', name: 'Для фарбованого волосся', type: 'Для фарбованого волосся' },
-        { id: 'damaged-hair', name: 'Для пошкодженого волосся', type: 'Для пошкодженого волосся' },
-        { id: 'fluffy-hair', name: 'Для пухнастого волосся', type: 'Для пухнастого волосся' },
-        { id: 'dry-shampoo', name: 'Сухий шампунь', type: 'Сухий шампунь' },
-        { id: 'all-hair-types', name: 'Для всіх типів волосся', type: 'Для всіх типів волосся' },
-        { id: 'for-volume', name: 'Для об’єму', type: 'Для об’єму' },
-        { id: 'anti-dandruff', name: 'Проти лупи', type: 'Проти лупи' },
-      ],
+      items: [],
     },
     {
       category: 'Кондиціонери',
       categoryId: 'conditioners',
-      items: [
-        { id: 'conditioner-repair', name: 'Відновлювальний кондиціонер' },
-        { id: 'conditioner-volume', name: 'Для об’єму' },
-        { id: 'conditioner-moisture', name: 'Зволожувальний' },
-      ],
+      items: [],
     },
     {
-      category: 'Маски',
-      categoryId: 'masks',
-      items: [
-        { id: 'hair-mask-repair', name: 'Відновлювальна маска' },
-        { id: 'hair-mask-moisture', name: 'Зволожувальна маска' },
-        { id: 'hair-mask-nourish', name: 'Живильна маска' },
-      ],
+      category: 'Бальзами',
+      categoryId: 'balms',
+      items: [],
     },
     {
-      category: 'Стайлінг',
+      category: 'Маски (зволожуючі, відновлюючі)',
+      categoryId: 'hair-masks',
+      items: [],
+    },
+    {
+      category: 'Сироватки (термозахист, зміцнення)',
+      categoryId: 'hair-serums',
+      items: [],
+    },
+    {
+      category: 'Олії (арганова, кокосова, рицинова)',
+      categoryId: 'hair-oils',
+      items: [],
+    },
+    {
+      category: 'Термозахист',
+      categoryId: 'heat-protection',
+      items: [],
+    },
+    {
+      category: 'Сухі шампуні',
+      categoryId: 'dry-shampoos',
+      items: [],
+    },
+    {
+      category: 'Спреї для блиску',
+      categoryId: 'shine-sprays',
+      items: [],
+    },
+    {
+      category: 'Стайлінг (муси, лаки, гелі, віски)',
       categoryId: 'styling',
+      items: [],
+    },
+    {
+      category: 'Засоби для фарбування',
+      categoryId: 'hair-dyes',
+      items: [],
+    },
+    {
+      category: 'Тоніки',
+      categoryId: 'tonics',
+      items: [],
+    },
+    {
+      category: 'Гребінці (антистатичні, масажні)',
+      categoryId: 'combs',
+      items: [],
+    },
+    {
+      category: 'Плойки',
+      categoryId: 'curling-irons',
+      items: [],
+    },
+    {
+      category: 'Фени',
+      categoryId: 'hair-dryers',
+      items: [],
+    },
+    {
+      category: 'Випрямлячі',
+      categoryId: 'straighteners',
+      items: [],
+    },
+  ],
+  menscare: [
+    {
+      category: 'Для гоління',
+      categoryId: 'shaving',
       items: [
-        { id: 'hair-spray', name: 'Лак для волосся' },
-        { id: 'hair-mousse', name: 'Мус для укладки' },
-        { id: 'heat-protection', name: 'Термозахист' },
+        { id: 'shaving-foam', name: 'Піна, Гель, Креми' },
+        { id: 'aftershave', name: 'Після гоління: Лосьйони, Бальзами' },
+        { id: 'beard-care', name: 'Догляд за бородою: Масло, Бальзам, Віск, Шампуні для бороди' },
+      ],
+    },
+    {
+      category: 'Догляд за шкірою',
+      categoryId: 'mens-skincare',
+      items: [
+        { id: 'mens-cleansing', name: 'Очищення' },
+        { id: 'mens-cream', name: 'Креми' },
+        { id: 'mens-serum', name: 'Сироватки' },
+      ],
+    },
+    {
+      category: 'Догляд за тілом',
+      categoryId: 'mens-bodycare',
+      items: [
+        { id: 'mens-deodorant', name: 'Дезодоранти' },
+        { id: 'mens-shower-gel', name: 'Гелі' },
+        { id: 'mens-lotion', name: 'Лосьйони' },
+      ],
+    },
+    {
+      category: 'Волосся',
+      categoryId: 'mens-haircare',
+      items: [
+        { id: 'mens-styling', name: 'Стайлінг' },
+        { id: 'mens-shampoo', name: 'Шампуні' },
+        { id: 'mens-serum', name: 'Сироватки' },
       ],
     },
   ],
-  body: [
+  childcare: [
     {
-      category: 'Очищення',
-      categoryId: 'body-cleansing',
-      items: [
-        { id: 'shower-gel', name: 'Гель для душу' },
-        { id: 'body-scrub', name: 'Скраб для тіла' },
-        { id: 'bath-foam', name: 'Піна для ванни' },
-      ],
+      category: 'Шампуні',
+      categoryId: 'child-shampoos',
+      items: [],
     },
     {
-      category: 'Зволоження та живлення',
-      categoryId: 'body-moisturizing',
-      items: [
-        { id: 'body-cream', name: 'Крем для тіла' },
-        { id: 'body-lotion', name: 'Лосьйон для тіла' },
-        { id: 'body-oil', name: 'Олія для тіла' },
-      ],
+      category: 'Гелі',
+      categoryId: 'child-gels',
+      items: [],
     },
     {
-      category: 'Догляд за руками та ногами',
-      categoryId: 'hands-feet',
-      items: [
-        { id: 'hand-cream', name: 'Крем для рук' },
-        { id: 'foot-cream', name: 'Крем для ніг' },
-        { id: 'cuticle-care', name: 'Догляд за кутикулою' },
-      ],
-    },
-    {
-      category: 'Спеціальний догляд',
-      categoryId: 'body-special-care',
-      items: [
-        { id: 'anti-cellulite', name: 'Антицелюлітні засоби' },
-        { id: 'deodorant', name: 'Дезодоранти' },
-        { id: 'sun-protection-body', name: 'Сонцезахисні засоби для тіла' },
-      ],
-    },
-  ],
-  dermocosmetics: [
-    {
-      category: 'Очищення шкіри',
-      categoryId: 'dermo-cleansing',
-      items: [
-        { id: 'dermo-cleansing-gel', name: 'Гель для вмивання' },
-        { id: 'dermo-micellar-water', name: 'Міцелярна вода' },
-        { id: 'dermo-cleansing-foam', name: 'Пінка для вмивання' },
-      ],
-    },
-    {
-      category: 'Догляд за проблемною шкірою',
-      categoryId: 'problem-skin',
-      items: [
-        { id: 'acne-treatment-dermo', name: 'Засоби від акне' },
-        { id: 'anti-redness', name: 'Засоби проти почервонінь' },
-        { id: 'sebum-control', name: 'Засоби для контролю себуму' },
-      ],
-    },
-    {
-      category: 'Зволоження та відновлення',
-      categoryId: 'dermo-moisturizing',
-      items: [
-        { id: 'dermo-moisturizer', name: 'Зволожувальний крем' },
-        { id: 'dermo-serum', name: 'Сироватка' },
-        { id: 'dermo-repair', name: 'Відновлювальний крем' },
-      ],
+      category: 'Креми',
+      categoryId: 'child-creams',
+      items: [],
     },
     {
       category: 'Сонцезахист',
-      categoryId: 'dermo-sun-protection',
-      items: [
-        { id: 'dermo-spf-cream', name: 'Сонцезахисний крем' },
-        { id: 'dermo-spf-spray', name: 'Сонцезахисний спрей' },
-      ],
+      categoryId: 'child-spf',
+      items: [],
+    },
+    {
+      category: 'Засоби для підмивання',
+      categoryId: 'child-washes',
+      items: [],
+    },
+    {
+      category: 'Дитячі масла',
+      categoryId: 'child-oils',
+      items: [],
+    },
+    {
+      category: 'Заспокійливі креми',
+      categoryId: 'child-soothing-creams',
+      items: [],
+    },
+    {
+      category: 'Засоби при попрілостях',
+      categoryId: 'child-diaper-creams',
+      items: [],
+    },
+    {
+      category: 'Підгузки',
+      categoryId: 'diapers',
+      items: [],
+    },
+    {
+      category: 'Вологі серветки',
+      categoryId: 'child-wipes',
+      items: [],
     },
   ],
-  professional: [
+  naturalcosmetics: [
     {
-      category: 'Професійний догляд за обличчям',
-      categoryId: 'pro-face-care',
-      items: [
-        { id: 'pro-cleansing', name: 'Професійне очищення' },
-        { id: 'pro-peeling', name: 'Професійні пілінги' },
-        { id: 'pro-mask', name: 'Професійні маски' },
-      ],
+      category: 'Натуральний макіяж',
+      categoryId: 'natural-makeup',
+      items: [],
     },
     {
-      category: 'Професійний догляд за волоссям',
-      categoryId: 'pro-hair-care',
-      items: [
-        { id: 'pro-shampoo', name: 'Професійний шампунь' },
-        { id: 'pro-conditioner', name: 'Професійний кондиціонер' },
-        { id: 'pro-hair-mask', name: 'Професійна маска для волосся' },
-      ],
+      category: 'Органічний догляд за шкірою',
+      categoryId: 'organic-skincare',
+      items: [],
     },
     {
-      category: 'Професійний макіяж',
-      categoryId: 'pro-makeup',
-      items: [
-        { id: 'pro-foundation', name: 'Професійний тональний крем' },
-        { id: 'pro-eyeshadow', name: 'Професійні тіні' },
-        { id: 'pro-lipstick', name: 'Професійна помада' },
-      ],
+      category: 'Волосся без сульфатів/парабенів',
+      categoryId: 'sulfate-free-haircare',
+      items: [],
     },
     {
-      category: 'Інструменти та аксесуари',
-      categoryId: 'pro-tools',
-      items: [
-        { id: 'pro-brushes', name: 'Професійні пензлі' },
-        { id: 'pro-sponges', name: 'Професійні спонжі' },
-        { id: 'pro-lash-curlers', name: 'Щипці для вій' },
-      ],
+      category: 'Еко-догляд для тіла',
+      categoryId: 'eco-bodycare',
+      items: [],
     },
   ],
   perfumery: [
     {
-      category: 'Жіноча парфумерія',
-      categoryId: 'women-perfume',
-      items: [
-        { id: 'women-eau-de-parfum', name: 'Парфумована вода' },
-        { id: 'women-eau-de-toilette', name: 'Туалетна вода' },
-        { id: 'women-perfume-mist', name: 'Парфумований спрей' },
-      ],
+      category: 'Жіночі парфуми (парфумована вода, туалетна вода, тверді духи)',
+      categoryId: 'women-perfumes',
+      items: [],
     },
     {
-      category: 'Чоловіча парфумерія',
-      categoryId: 'men-perfume',
-      items: [
-        { id: 'men-eau-de-parfum', name: 'Парфумована вода' },
-        { id: 'men-eau-de-toilette', name: 'Туалетна вода' },
-        { id: 'men-aftershave', name: 'Лосьйон після гоління' },
-      ],
+      category: 'Чоловічі парфуми',
+      categoryId: 'men-perfumes',
+      items: [],
     },
     {
-      category: 'Унісекс парфумерія',
-      categoryId: 'unisex-perfume',
-      items: [
-        { id: 'unisex-eau-de-parfum', name: 'Парфумована вода' },
-        { id: 'unisex-eau-de-toilette', name: 'Туалетна вода' },
-      ],
+      category: 'Унісекс',
+      categoryId: 'unisex-perfumes',
+      items: [],
     },
     {
-      category: 'Аромати для дому',
-      categoryId: 'home-fragrance',
-      items: [
-        { id: 'diffuser', name: 'Аромадифузори' },
-        { id: 'scented-candles', name: 'Ароматичні свічки' },
-        { id: 'room-spray', name: 'Спрей для приміщення' },
-      ],
+      category: 'Парфумовані міні версії',
+      categoryId: 'mini-perfumes',
+      items: [],
+    },
+    {
+      category: 'Дезодоранти',
+      categoryId: 'perfumed-deodorants',
+      items: [],
+    },
+    {
+      category: 'Аромаспреї',
+      categoryId: 'fragrance-sprays',
+      items: [],
+    },
+    {
+      category: 'Парфумовані лосьйони',
+      categoryId: 'perfumed-lotions',
+      items: [],
+    },
+  ],
+  accessories: [
+    {
+      category: 'Косметички',
+      categoryId: 'cosmetic-bags',
+      items: [],
+    },
+    {
+      category: 'Дзеркала',
+      categoryId: 'mirrors',
+      items: [],
+    },
+    {
+      category: 'Гребінці',
+      categoryId: 'combs',
+      items: [],
+    },
+    {
+      category: 'Пов’язки',
+      categoryId: 'headbands',
+      items: [],
+    },
+    {
+      category: 'Щипчики',
+      categoryId: 'tweezers',
+      items: [],
+    },
+    {
+      category: 'Інструменти для чищення пензлів',
+      categoryId: 'brush-cleaners',
+      items: [],
+    },
+    {
+      category: 'Аплікатори',
+      categoryId: 'applicators',
+      items: [],
+    },
+    {
+      category: 'Пінцети',
+      categoryId: 'pincers',
+      items: [],
+    },
+    {
+      category: 'Дозатори',
+      categoryId: 'dispensers',
+      items: [],
+    },
+    {
+      category: 'Палітри для міксування засобів',
+      categoryId: 'mixing-palettes',
+      items: [],
+    },
+  ],
+  giftsets: [
+    {
+      category: 'Подарункові бокси (мейкап, догляд)',
+      categoryId: 'gift-boxes',
+      items: [],
+    },
+    {
+      category: 'Святкові колекції',
+      categoryId: 'holiday-collections',
+      items: [],
+    },
+    {
+      category: 'Міні-набори для подорожей',
+      categoryId: 'travel-sets',
+      items: [],
+    },
+    {
+      category: 'Набори для чоловіків',
+      categoryId: 'mens-sets',
+      items: [],
+    },
+    {
+      category: 'Дитячі набори',
+      categoryId: 'child-sets',
+      items: [],
+    },
+    {
+      category: 'Бʼюті-календарі',
+      categoryId: 'beauty-calendars',
+      items: [],
     },
   ],
 };
@@ -305,12 +493,14 @@ function CategorySubcategories() {
     <div className="category-subcategories">
       <h1>
         {groupId === 'makeup' ? 'Макіяж' :
-         groupId === 'face' ? 'Догляд за обличчям' :
-         groupId === 'hair' ? 'Догляд за волоссям' :
-         groupId === 'body' ? 'Догляд за тілом' :
-         groupId === 'dermocosmetics' ? 'Дерматокосметика' :
-         groupId === 'professional' ? 'Професійна косметика' :
-         groupId === 'perfumery' ? 'Парфумерія' : 'Категорія'}
+         groupId === 'skincare' ? 'Догляд за шкірою' :
+         groupId === 'haircare' ? 'Догляд за волоссям' :
+         groupId === 'menscare' ? 'Чоловічий догляд' :
+         groupId === 'childcare' ? 'Дитячий догляд' :
+         groupId === 'naturalcosmetics' ? 'Натуральна косметика' :
+         groupId === 'perfumery' ? 'Парфумерія' :
+         groupId === 'accessories' ? 'Аксесуари' :
+         groupId === 'giftsets' ? 'Набори/Подарунки' : 'Категорія'}
       </h1>
       <div className="subcategories-container">
         {columns.map((column, colIndex) => (

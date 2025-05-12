@@ -1,8 +1,48 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import SearchResults from './SearchResults';
 import './Header.css';
+
+const categoryNames = {
+  shampoos: 'Шампуні',
+  facecream: 'Креми для обличчя',
+  facemask: 'Маски для обличчя',
+  tonal: 'Тональні засоби',
+  powder: 'Пудри',
+  blush: 'Рум’яна',
+  highlighter: 'Хайлайтери',
+  concealer: 'Консилери',
+  lipstick: 'Помади',
+  lipgloss: 'Блиски для губ',
+  lipliner: 'Олівці для губ',
+  eyeshadow: 'Тіні для повік',
+  eyeliner: 'Підводки',
+  mascara: 'Туші для вій',
+  browpencil: 'Олівці для брів',
+  browshadow: 'Тіні для брів',
+  browgel: 'Гелі для брів',
+  nailpolish: 'Лаки для нігтів',
+  makeupremover: 'Засоби для зняття макіяжу',
+  brushes: 'Пензлі для макіяжу',
+  serum: 'Сироватки',
+  scrub: 'Скраби',
+  cleanser: 'Очищувальні засоби',
+  tonic: 'Тоніки',
+  micellar: 'Міцелярна вода',
+  eyecream: 'Креми для очей',
+  lipbalm: 'Бальзами для губ',
+  antiaging: 'Антивікові засоби',
+  sunscreen: 'Сонцезахисні засоби',
+  conditioner: 'Кондиціонери',
+  hairmask: 'Маски для волосся',
+  hairoil: 'Олії для волосся',
+  hairserum: 'Сироватки для волосся',
+  hairspray: 'Лаки для волосся',
+  hairdye: 'Фарби для волосся',
+  styling: 'Засоби для укладки',
+  dryshampoo: 'Сухі шампуні',
+  hairloss: 'Засоби проти випадіння волосся',
+};
 
 function Header({ setSearchTerm }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -10,28 +50,41 @@ function Header({ setSearchTerm }) {
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResultsUpdated, setIsResultsUpdated] = useState(false);
+  const [isInitialOpen, setIsInitialOpen] = useState(true);
+  const [isClosing, setIsClosing] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const searchInputRef = useRef(null);
+  const resultsRef = useRef(null);
 
-  // Handle search submission
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const handleSearch = useCallback(() => {
+    console.log('handleSearch called with searchQuery:', searchQuery);
     if (searchQuery.trim()) {
       setSearchTerm(searchQuery);
       navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
       setShowResults(false);
       setIsLoading(false);
       setIsResultsUpdated(false);
+      setIsInitialOpen(true);
+      setShowText(false);
     }
   }, [searchQuery, setSearchTerm, navigate]);
 
-  // Handle input change and fetch search results from the database
   const handleInputChange = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
 
     if (query.trim()) {
       setIsLoading(true);
-      setIsResultsUpdated(false); // Reset animation trigger
+      setIsResultsUpdated(false);
       try {
         const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: { search: query },
@@ -39,7 +92,7 @@ function Header({ setSearchTerm }) {
 
         setSearchResults(response.data.groupedResults || []);
         setShowResults(true);
-        setIsResultsUpdated(true); // Trigger animation after results are updated
+        setIsResultsUpdated(true);
       } catch (error) {
         console.error('Помилка пошуку:', error);
         setSearchResults([]);
@@ -56,31 +109,72 @@ function Header({ setSearchTerm }) {
     }
   };
 
-  // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  // Clear search input and results
   const handleClearSearch = () => {
+    console.log('handleClearSearch called');
     setSearchQuery('');
+    if (searchInputRef.current) {
+      console.log('Clearing input value');
+      searchInputRef.current.value = '';
+    } else {
+      console.warn('searchInputRef.current is null');
+    }
     setSearchResults([]);
     setShowResults(false);
     setSearchTerm('');
     setIsLoading(false);
     setIsResultsUpdated(false);
+    setIsInitialOpen(true);
+    setShowText(false);
   };
 
-  // Close search results
   const handleCloseResults = () => {
-    setShowResults(false);
-    setIsResultsUpdated(false);
+    setIsClosing(true);
+    setTimeout(() => {
+      setShowResults(false);
+      setIsClosing(false);
+      setIsInitialOpen(true);
+      setShowText(false);
+    }, 200);
   };
 
-  // Cleanup on unmount
+  const handleLinkClick = (path) => {
+    console.log('handleLinkClick called with path:', path);
+    setIsClosing(true);
+    handleClearSearch();
+    setTimeout(() => {
+      setIsClosing(false);
+      handleCloseResults();
+      navigate(path);
+    }, 200);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/');
+  };
+
   useEffect(() => {
+    if (isResultsUpdated && !isLoading && searchResults.length > 0) {
+      setShowText(false);
+      const timer = setTimeout(() => {
+        setShowText(true);
+      }, 50);
+      return () => clearTimeout(timer);
+    } else {
+      setShowText(false);
+    }
+  }, [isResultsUpdated, isLoading, searchResults]);
+
+  useEffect(() => {
+    console.log('searchInputRef.current:', searchInputRef.current);
     return () => {
       setSearchResults([]);
       setShowResults(false);
@@ -104,6 +198,7 @@ function Header({ setSearchTerm }) {
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               className="search-input"
+              ref={searchInputRef}
             />
             {searchQuery && (
               <>
@@ -148,13 +243,53 @@ function Header({ setSearchTerm }) {
             Знайти
           </button>
           {showResults && searchResults.length > 0 && (
-            <SearchResults
-              results={searchResults}
-              searchQuery={searchQuery}
-              onClose={handleCloseResults}
-              isResultsUpdated={isResultsUpdated}
-              isLoading={isLoading}
-            />
+            <div
+              className={`search-results ${isInitialOpen ? 'initial-open' : ''} ${isClosing ? 'closing' : ''}`}
+              ref={resultsRef}
+            >
+              {searchResults.slice(0, 2).map((category, index) => (
+                <div key={`${category.category}-${searchQuery}`} className="search-category">
+                  <span
+                    className={`category-title ${showText && !isLoading ? 'animate-text' : ''}`}
+                    onClick={() => handleLinkClick(`/category/${category.category}`)}
+                    style={{ animationDelay: `${index * 0.1}s`, cursor: 'pointer' }}
+                  >
+                    {categoryNames[category.category] || category.category} ({category.count})
+                  </span>
+                  <ul className="product-list">
+                    {category.products.slice(0, 5).map((product, idx) => (
+                      <li key={`${product.id}-${searchQuery}`}>
+                        <span
+                          className={`product-link ${showText && !isLoading ? 'animate-text' : ''}`}
+                          onClick={() => handleLinkClick(`/product/${product.id}`)}
+                          style={{ animationDelay: `${index * 0.1 + idx * 0.05 + 0.2}s`, cursor: 'pointer' }}
+                        >
+                          {`${product.name} (${product.specs.volume || 'Н/Д'})`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  {category.products.length > 5 && (
+                    <button
+                      className={`more-products ${showText && !isLoading ? 'animate-text' : ''}`}
+                      onClick={() => handleSearch()}
+                      style={{ animationDelay: `${index * 0.1 + 0.45}s`, cursor: 'pointer' }}
+                    >
+                      Подивитись інші товари ({category.products.length - 5})
+                    </button>
+                  )}
+                </div>
+              ))}
+              {searchResults.length > 0 && (
+                <span
+                  className={`view-all ${showText && !isLoading ? 'animate-text' : ''}`}
+                  onClick={() => handleLinkClick(`/search?query=${encodeURIComponent(searchQuery)}`)}
+                  style={{ animationDelay: '0.5s', cursor: 'pointer' }}
+                >
+                  Переглянути усі товари ({searchResults.reduce((sum, cat) => sum + cat.count, 0)})
+                </span>
+              )}
+            </div>
           )}
         </div>
         <div className="profile">
@@ -172,7 +307,18 @@ function Header({ setSearchTerm }) {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span>Увійти</span>
+          {user ? (
+            <div className="user-profile">
+              <span>{user.nickname}</span>
+              <button onClick={handleLogout} className="logout-button">
+                Вийти
+              </button>
+            </div>
+          ) : (
+            <span to="/login" className="login-link">
+              Увійти
+            </span>
+          )}
         </div>
       </div>
     </header>
