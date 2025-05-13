@@ -342,7 +342,7 @@ function Header({ setSearchTerm }) {
                   </div>
                   <div className="context-menu-item" 
                   onClick={() => {
-                      // navigate('/wishlist');
+                      navigate('/wishlist');
                       setShowContextMenu(false);
                     }}>
                     Бажане

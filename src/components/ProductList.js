@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// ProductList.js
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import './ProductList.css';
@@ -8,11 +9,16 @@ function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
 
-  // Отримуємо параметри з URL, враховуючи як 'query', так і 'search'
-  const queryParams = new URLSearchParams(location.search);
-  const initialType = queryParams.get('type') || '';
-  const searchQuery = queryParams.get('query') || queryParams.get('search') || searchTerm || '';
-  const isSearchPage = location.pathname === '/search';
+  // Memoize queryParams and derived values to prevent unnecessary re-computation
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const searchQuery = useMemo(
+    () => queryParams.get('query') || queryParams.get('search') || searchTerm || '',
+    [queryParams, searchTerm]
+  );
+  const initialType = useMemo(() => queryParams.get('type') || '', [queryParams]);
+  const isSearchPage = useMemo(() => location.pathname === '/search', [location.pathname]);
+
+  // Log initialization for debugging
   console.log('ProductList initialized with:', {
     categoryId,
     searchTerm,
@@ -22,7 +28,11 @@ function ProductList({ searchTerm }) {
     location: location.pathname + location.search,
   });
 
-  // Стан для всіх фільтрів
+  // State for user and token to avoid localStorage re-parsing
+  const [user] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
+  const [token] = useState(() => localStorage.getItem('token') || null);
+
+  // State for filters
   const [filters, setFilters] = useState({
     brands: [],
     priceRanges: [],
@@ -31,7 +41,7 @@ function ProductList({ searchTerm }) {
     categories: [],
   });
 
-  // Стан для вибраних фільтрів
+  // State for selected filters
   const [selectedFilters, setSelectedFilters] = useState({
     brands: [],
     priceRanges: [],
@@ -40,7 +50,7 @@ function ProductList({ searchTerm }) {
     categories: categoryId ? [categoryId] : [],
   });
 
-  // Стан для застосованих фільтрів
+  // State for applied filters
   const [appliedFilters, setAppliedFilters] = useState({
     brands: [],
     priceRanges: [],
@@ -49,9 +59,8 @@ function ProductList({ searchTerm }) {
     categories: categoryId ? [categoryId] : [],
   });
 
-  // Стан для всіх продуктів (з API)
+  // State for products and pagination
   const [allProducts, setAllProducts] = useState([]);
-  // Стан для відфільтрованих продуктів і пагінації
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [previewProductCount, setPreviewProductCount] = useState(0);
@@ -61,17 +70,17 @@ function ProductList({ searchTerm }) {
   const [startPage, setStartPage] = useState(1);
   const [loadMorePages, setLoadMorePages] = useState(1);
 
-  // Стан для пошуку брендів
+  // State for brand search
   const [brandSearch, setBrandSearch] = useState('');
 
-  // Стан для кастомного діапазону цін
+  // State for custom price range
   const [customPriceFrom, setCustomPriceFrom] = useState('');
   const [customPriceTo, setCustomPriceTo] = useState('');
 
-  // Стан для активного фільтру
+  // State for active filter
   const [activeFilter, setActiveFilter] = useState(null);
 
-  // Стан для неактивних фільтрів
+  // State for disabled filters
   const [disabledFilters, setDisabledFilters] = useState({
     brands: new Set(),
     priceRanges: new Set(),
@@ -80,7 +89,7 @@ function ProductList({ searchTerm }) {
     categories: new Set(),
   });
 
-  // Стан для "Більше/Менше"
+  // State for "Show More"
   const [showMore, setShowMore] = useState({
     brands: false,
     priceRanges: false,
@@ -89,57 +98,29 @@ function ProductList({ searchTerm }) {
     categories: false,
   });
 
-  // Стан для індикатора завантаження
+  // State for loading indicator
   const [isLoading, setIsLoading] = useState(true);
 
-  // Стан для статусу збереження продуктів
+  // State for saved products
   const [savedProducts, setSavedProducts] = useState(new Set());
-  // Стан для показу повідомлення про логін
+
+  // State for login prompt
   const [showLoginPrompt, setShowLoginPrompt] = useState({});
 
-  // Рефи для позиціонування плашки та анімації фільтрів
+  // Refs for filter positioning
   const filterRefs = useRef({});
   const tagRef = useRef(null);
   const filterItemsRefs = useRef({});
 
-  // Перевірка авторизації користувача
-  const user = JSON.parse(localStorage.getItem('user'));
-  const token = localStorage.getItem('token');
-
-  // Функція для отримання мінімальної ціни з store_prices
+  // Get minimum price from store_prices
   const getMinPrice = (storePrices) => {
     if (!storePrices || storePrices.length === 0) return 0;
     return Math.min(...storePrices.map(sp => sp.price));
   };
 
-  // Завантаження статусу збереження продуктів
-  const fetchSavedStatus = useCallback(async () => {
-    if (!user || !token) {
-      setSavedProducts(new Set());
-      return;
-    }
-    try {
-      const promises = filteredProducts.map(product =>
-        axios.get(`https://price-ua-react-backend.onrender.com/saved-products/${product.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      );
-      const responses = await Promise.all(promises);
-      const savedSet = new Set();
-      responses.forEach((response, index) => {
-        if (response.data.isSaved) {
-          savedSet.add(filteredProducts[index].id);
-        }
-      });
-      setSavedProducts(savedSet);
-    } catch (error) {
-      console.error('Помилка завантаження статусу збереження:', error);
-    }
-  }, [filteredProducts, user, token]);
-
-  // Обробка кліку на сердечко
+  // Handle heart click with optimistic update
   const handleHeartClick = async (productId, event) => {
-    event.preventDefault(); // Запобігаємо переходу за посиланням
+    event.preventDefault();
     if (!user || !token) {
       setShowLoginPrompt(prev => ({ ...prev, [productId]: true }));
       setTimeout(() => {
@@ -149,15 +130,20 @@ function ProductList({ searchTerm }) {
     }
 
     const isSaved = savedProducts.has(productId);
+    setSavedProducts(prev => {
+      const newSet = new Set(prev);
+      if (isSaved) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+
     try {
       if (isSaved) {
         await axios.delete(`https://price-ua-react-backend.onrender.com/saved-products/${productId}`, {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        setSavedProducts(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(productId);
-          return newSet;
         });
       } else {
         await axios.post(
@@ -165,33 +151,32 @@ function ProductList({ searchTerm }) {
           { productId },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setSavedProducts(prev => new Set(prev).add(productId));
       }
     } catch (error) {
+      setSavedProducts(prev => {
+        const newSet = new Set(prev);
+        if (isSaved) {
+          newSet.add(productId);
+        } else {
+          newSet.delete(productId);
+        }
+        return newSet;
+      });
       console.error('Помилка при зміні статусу збереження:', error);
       alert('Не вдалося оновити статус бажаного. Спробуйте ще раз.');
     }
   };
 
-  // Завантаження статусу збереження при зміні filteredProducts
-  useEffect(() => {
-    if (!isLoading && filteredProducts.length > 0) {
-      fetchSavedStatus();
-    }
-  }, [filteredProducts, isLoading, fetchSavedStatus]);
-
-  // Функція для попередньої фільтрації (для previewProductCount та disabledFilters)
+  // Calculate filtered products for preview and disabled filters
   const calculateFilteredProducts = useCallback((tempFilters) => {
     let filtered = [...allProducts];
 
-    // Фільтр за пошуковим запитом
     if (searchQuery) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Фільтр за категорією
     if (categoryId && !isSearchPage) {
       filtered = filtered.filter(product => product.category_id === categoryId);
     } else if (tempFilters.categories.length > 0 && isSearchPage) {
@@ -200,14 +185,12 @@ function ProductList({ searchTerm }) {
       );
     }
 
-    // Фільтр за брендами
     if (tempFilters.brands.length > 0) {
       filtered = filtered.filter(product =>
         tempFilters.brands.includes(product.brand_name)
       );
     }
 
-    // Фільтр за ціною
     if (customPriceFrom !== '' && customPriceTo !== '') {
       const priceFrom = parseFloat(customPriceFrom);
       const priceTo = parseFloat(customPriceTo);
@@ -227,14 +210,12 @@ function ProductList({ searchTerm }) {
       });
     }
 
-    // Фільтр за об’ємами
     if (tempFilters.volumes.length > 0) {
       filtered = filtered.filter(product =>
         tempFilters.volumes.includes(product.volume)
       );
     }
 
-    // Фільтр за типами
     if (tempFilters.types.length > 0) {
       filtered = filtered.filter(product =>
         tempFilters.types.includes(product.feature_type)
@@ -244,13 +225,13 @@ function ProductList({ searchTerm }) {
     return filtered;
   }, [allProducts, searchQuery, categoryId, isSearchPage, customPriceFrom, customPriceTo]);
 
-  // Функція для previewProductCount
+  // Calculate preview product count
   const calculatePreviewProducts = useCallback(() => {
     const filtered = calculateFilteredProducts(selectedFilters);
     return filtered.length;
   }, [calculateFilteredProducts, selectedFilters]);
 
-  // Функція для оновлення неактивних фільтрів
+  // Update disabled filters
   const updateDisabledFilters = useCallback(() => {
     const newDisabledFilters = {
       brands: new Set(),
@@ -260,7 +241,6 @@ function ProductList({ searchTerm }) {
       categories: new Set(),
     };
 
-    // Базові фільтри: усі вибрані фільтри, крім поточного типу
     const baseFilters = {
       brands: [...selectedFilters.brands],
       priceRanges: [...selectedFilters.priceRanges],
@@ -269,97 +249,55 @@ function ProductList({ searchTerm }) {
       categories: [...selectedFilters.categories],
     };
 
-    // Перевірка кожного бренду
     filters.brands.forEach(brand => {
-      const tempFilters = {
-        ...baseFilters,
-        brands: [brand],
-        priceRanges: baseFilters.priceRanges,
-        volumes: baseFilters.volumes,
-        types: baseFilters.types,
-        categories: baseFilters.categories,
-      };
+      const tempFilters = { ...baseFilters, brands: [brand], priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: baseFilters.types, categories: baseFilters.categories };
       const filtered = calculateFilteredProducts(tempFilters);
-      if (filtered.length === 0) {
-        newDisabledFilters.brands.add(brand);
-      }
+      if (filtered.length === 0) newDisabledFilters.brands.add(brand);
     });
 
-    // Перевірка кожного цінового діапазону
     filters.priceRanges.forEach(range => {
-      const tempFilters = {
-        ...baseFilters,
-        brands: baseFilters.brands,
-        priceRanges: [range.label],
-        volumes: baseFilters.volumes,
-        types: baseFilters.types,
-        categories: baseFilters.categories,
-      };
+      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: [range.label], volumes: baseFilters.volumes, types: baseFilters.types, categories: baseFilters.categories };
       const filtered = calculateFilteredProducts(tempFilters);
-      if (filtered.length === 0) {
-        newDisabledFilters.priceRanges.add(range.label);
-      }
+      if (filtered.length === 0) newDisabledFilters.priceRanges.add(range.label);
     });
 
-    // Перевірка кожного об’єму
     filters.volumes.forEach(volume => {
-      const tempFilters = {
-        ...baseFilters,
-        brands: baseFilters.brands,
-        priceRanges: baseFilters.priceRanges,
-        volumes: [volume],
-        types: baseFilters.types,
-        categories: baseFilters.categories,
-      };
+      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: [volume], types: baseFilters.types, categories: baseFilters.categories };
       const filtered = calculateFilteredProducts(tempFilters);
-      if (filtered.length === 0) {
-        newDisabledFilters.volumes.add(volume);
-      }
+      if (filtered.length === 0) newDisabledFilters.volumes.add(volume);
     });
 
-    // Перевірка кожного типу
     filters.types.forEach(type => {
-      const tempFilters = {
-        ...baseFilters,
-        brands: baseFilters.brands,
-        priceRanges: baseFilters.priceRanges,
-        volumes: baseFilters.volumes,
-        types: [type],
-        categories: baseFilters.categories,
-      };
+      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: [type], categories: baseFilters.categories };
       const filtered = calculateFilteredProducts(tempFilters);
-      if (filtered.length === 0) {
-        newDisabledFilters.types.add(type);
-      }
+      if (filtered.length === 0) newDisabledFilters.types.add(type);
     });
 
-    // Перевірка кожної категорії (для /search)
     if (isSearchPage) {
       filters.categories.forEach(category => {
-        const tempFilters = {
-          ...baseFilters,
-          brands: baseFilters.brands,
-          priceRanges: baseFilters.priceRanges,
-          volumes: baseFilters.volumes,
-          types: baseFilters.types,
-          categories: [category],
-        };
+        const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: baseFilters.types, categories: [category] };
         const filtered = calculateFilteredProducts(tempFilters);
-        if (filtered.length === 0) {
-          newDisabledFilters.categories.add(category);
-        }
+        if (filtered.length === 0) newDisabledFilters.categories.add(category);
       });
     }
 
     setDisabledFilters(newDisabledFilters);
   }, [filters, selectedFilters, calculateFilteredProducts, isSearchPage]);
 
-  // Завантаження всіх продуктів із API
+  // Fetch products and saved statuses
   useEffect(() => {
+    console.log('useEffect triggered with dependencies:', {
+      categoryId,
+      searchQuery,
+      initialType,
+      isSearchPage,
+      user: user ? user.id : null,
+      token: token ? 'present' : 'absent',
+    });
+
     const fetchProducts = async () => {
-      setIsLoading(true); // Починаємо завантаження
+      setIsLoading(true);
       try {
-        // Логування параметрів запиту
         const requestParams = {
           search: searchQuery || undefined,
           category: categoryId && !isSearchPage ? categoryId : undefined,
@@ -367,15 +305,13 @@ function ProductList({ searchTerm }) {
         };
         console.log('Fetching products with params:', requestParams);
 
-        // Завантажуємо всі продукти з урахуванням пошукового запиту та категорії
-        const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
+        const productsResponse = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: requestParams,
         });
 
-        // Логування отриманих даних
-        console.log('API response:', {
-          productCount: response.data.products.length,
-          products: response.data.products.map(p => ({
+        console.log('Products API response:', {
+          productCount: productsResponse.data.products.length,
+          products: productsResponse.data.products.map(p => ({
             id: p.id,
             name: p.name,
             category_id: p.category_id,
@@ -383,9 +319,25 @@ function ProductList({ searchTerm }) {
           })),
         });
 
-        let productsData = response.data.products || [];
+        let productsData = productsResponse.data.products || [];
+        let savedProductIds = [];
+        if (user && token && productsData.length > 0) {
+          const productIds = productsData.map(p => p.id);
+          try {
+            const savedResponse = await axios.post(
+              'https://price-ua-react-backend.onrender.com/saved-products personally',
+              { productIds },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            savedProductIds = savedResponse.data.savedProductIds || [];
+            console.log('Saved products response:', { savedProductIds });
+          } catch (error) {
+            console.error('Помилка завантаження статусів збереження:', error);
+          }
+        }
 
-        // Ініціалізація фільтрів на основі отриманих продуктів
+        setSavedProducts(new Set(savedProductIds));
+
         const brandCounts = {};
         const typeCounts = {};
         const categoryCounts = {};
@@ -455,7 +407,7 @@ function ProductList({ searchTerm }) {
         });
 
         setAllProducts(productsData);
-        setFilteredProducts(productsData); // Спочатку встановлюємо, але useEffect нижче оновить
+        setFilteredProducts(productsData);
         setTotalProducts(productsData.length);
         setPreviewProductCount(productsData.length);
         setCurrentPage(1);
@@ -463,7 +415,6 @@ function ProductList({ searchTerm }) {
         setLoadMorePages(1);
         setIsPaginated(true);
 
-        // Скидання фільтрів
         setSelectedFilters({
           brands: [],
           priceRanges: [],
@@ -491,7 +442,6 @@ function ProductList({ searchTerm }) {
           categories: new Set(),
         });
 
-        // Автоматично вибираємо чекбокс типу
         if (initialType) {
           setTimeout(() => {
             const typeCheckbox = document.querySelector(`input[name="type"][value="${initialType}"]`);
@@ -505,34 +455,25 @@ function ProductList({ searchTerm }) {
         setFilteredProducts([]);
         setTotalProducts(0);
         setPreviewProductCount(0);
+        setSavedProducts(new Set());
       } finally {
-        setIsLoading(false); // Завершуємо завантаження
+        setIsLoading(false);
+        console.log('fetchProducts completed');
       }
     };
 
     fetchProducts();
-  }, [categoryId, searchQuery, initialType, isSearchPage]);
+  }, [categoryId, searchQuery, initialType, isSearchPage, token, user]);
 
-  // Оновлення previewProductCount та disabledFilters при зміні selectedFilters
+  // Update preview count and disabled filters
   useEffect(() => {
     if (!isLoading) {
       setPreviewProductCount(calculatePreviewProducts());
       updateDisabledFilters();
     }
-  }, [
-    selectedFilters,
-    customPriceFrom,
-    customPriceTo,
-    searchQuery,
-    categoryId,
-    isSearchPage,
-    allProducts,
-    isLoading,
-    calculatePreviewProducts,
-    updateDisabledFilters,
-  ]);
+  }, [selectedFilters, customPriceFrom, customPriceTo, isLoading, calculatePreviewProducts, updateDisabledFilters]);
 
-  // Клієнтська фільтрація при зміні застосованих фільтрів
+  // Client-side filtering
   useEffect(() => {
     if (!isLoading && allProducts.length > 0) {
       console.log('Starting client-side filtering:', {
@@ -547,154 +488,51 @@ function ProductList({ searchTerm }) {
 
       let filtered = [...allProducts];
 
-      // Фільтр за пошуковим запитом
       if (searchQuery) {
-        console.log('Applying searchQuery filter:', { searchQuery });
-        filtered = filtered.filter(product => {
-          const matches = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (does not match "${searchQuery}")`);
-          }
-          return matches;
-        });
-        console.log('After searchQuery filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => product.name.toLowerCase().includes(searchQuery.toLowerCase()));
       }
 
-      // Фільтр за категорією
       if (categoryId && !isSearchPage) {
-        console.log('Applying categoryId filter:', { categoryId });
-        filtered = filtered.filter(product => {
-          const matches = product.category_id === categoryId;
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (category_id ${product.category_id} does not match "${categoryId}")`);
-          }
-          return matches;
-        });
-        console.log('After categoryId filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => product.category_id === categoryId);
       } else if (appliedFilters.categories.length > 0 && isSearchPage) {
-        console.log('Applying categories filter:', { categories: appliedFilters.categories });
-        filtered = filtered.filter(product => {
-          const matches = appliedFilters.categories.includes(product.category_name);
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (category_name ${product.category_name} not in ${appliedFilters.categories})`);
-          }
-          return matches;
-        });
-        console.log('After categories filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => appliedFilters.categories.includes(product.category_name));
       }
 
-      // Фільтр за брендами
       if (appliedFilters.brands.length > 0) {
-        console.log('Applying brands filter:', { brands: appliedFilters.brands });
-        filtered = filtered.filter(product => {
-          const matches = appliedFilters.brands.includes(product.brand_name);
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (brand ${product.brand_name} not in ${appliedFilters.brands})`);
-          }
-          return matches;
-        });
-        console.log('After brands filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => appliedFilters.brands.includes(product.brand_name));
       }
 
-      // Фільтр за ціною
       if (customPriceFrom !== '' && customPriceTo !== '') {
         const priceFrom = parseFloat(customPriceFrom);
         const priceTo = parseFloat(customPriceTo);
-        console.log('Applying custom price filter:', { priceFrom, priceTo });
         filtered = filtered.filter(product => {
           const minPrice = getMinPrice(product.store_prices);
-          const matches = minPrice >= priceFrom && minPrice <= priceTo;
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (price ${minPrice} not in range ${priceFrom}-${priceTo})`);
-          }
-          return matches;
-        });
-        console.log('After custom price filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
+          return minPrice >= priceFrom && minPrice <= priceTo;
         });
       } else if (appliedFilters.priceRanges.length > 0) {
-        console.log('Applying priceRanges filter:', { priceRanges: appliedFilters.priceRanges });
         filtered = filtered.filter(product => {
           const minPrice = getMinPrice(product.store_prices);
-          const matches = appliedFilters.priceRanges.some(range => {
-            const [min, max] = range.includes('+')
-              ? [1000, Infinity]
-              : range.split('-').map(Number);
+          return appliedFilters.priceRanges.some(range => {
+            const [min, max] = range.includes('+') ? [1000, Infinity] : range.split('-').map(Number);
             return minPrice >= min && (max === Infinity || minPrice <= max);
           });
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (price ${minPrice} not in ranges ${appliedFilters.priceRanges})`);
-          }
-          return matches;
-        });
-        console.log('After priceRanges filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
         });
       }
 
-      // Фільтр за об’ємами
       if (appliedFilters.volumes.length > 0) {
-        console.log('Applying volumes filter:', { volumes: appliedFilters.volumes });
-        filtered = filtered.filter(product => {
-          const matches = appliedFilters.volumes.includes(product.volume);
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (volume ${product.volume} not in ${appliedFilters.volumes})`);
-          }
-          return matches;
-        });
-        console.log('After volumes filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => appliedFilters.volumes.includes(product.volume));
       }
 
-      // Фільтр за типами
       if (appliedFilters.types.length > 0) {
-        console.log('Applying types filter:', { types: appliedFilters.types });
-        filtered = filtered.filter(product => {
-          const matches = appliedFilters.types.includes(product.feature_type);
-          if (!matches) {
-            console.log(`Excluding product: ${product.name} (type ${product.feature_type} not in ${appliedFilters.types})`);
-          }
-          return matches;
-        });
-        console.log('After types filter:', {
-          count: filtered.length,
-          products: filtered.map(p => p.name),
-        });
+        filtered = filtered.filter(product => appliedFilters.types.includes(product.feature_type));
       }
-
-      // Логування фінального результату
-      console.log('Final filtered products:', {
-        count: filtered.length,
-        products: filtered.map(p => ({
-          id: p.id,
-          name: p.name,
-          category_id: p.category_id,
-          category_name: p.category_name,
-        })),
-      });
 
       setFilteredProducts(filtered);
       setTotalProducts(filtered.length);
     }
   }, [allProducts, appliedFilters, customPriceFrom, customPriceTo, searchQuery, categoryId, isSearchPage, isLoading]);
 
-  // Обробка вибору фільтру
+  // Handle filter change
   const handleFilterChange = (filterType, value) => {
     setSelectedFilters((prev) => {
       const currentValues = prev[filterType] || [];
@@ -704,10 +542,7 @@ function ProductList({ searchTerm }) {
       } else {
         updatedValues = [...currentValues, value];
       }
-      const updatedFilters = {
-        ...prev,
-        [filterType]: updatedValues,
-      };
+      const updatedFilters = { ...prev, [filterType]: updatedValues };
       if (filterType === 'priceRanges') {
         setCustomPriceFrom('');
         setCustomPriceTo('');
@@ -717,23 +552,17 @@ function ProductList({ searchTerm }) {
     setActiveFilter({ type: filterType, value });
   };
 
-  // Видалення одного фільтру
+  // Remove a filter
   const removeFilter = (filterType, value) => {
     setSelectedFilters((prev) => {
       const updatedValues = (prev[filterType] || []).filter((v) => v !== value);
-      const updatedFilters = {
-        ...prev,
-        [filterType]: updatedValues,
-      };
-      setAppliedFilters({
-        ...prev,
-        [filterType]: updatedValues,
-      });
+      const updatedFilters = { ...prev, [filterType]: updatedValues };
+      setAppliedFilters({ ...prev, [filterType]: updatedValues });
       return updatedFilters;
     });
   };
 
-  // Скидання всіх фільтрів
+  // Reset all filters
   const resetAllFilters = () => {
     const emptyFilters = {
       brands: [],
@@ -760,7 +589,7 @@ function ProductList({ searchTerm }) {
     setIsPaginated(true);
   };
 
-  // Застосування фільтрів
+  // Apply filters
   const applyFilters = () => {
     setAppliedFilters({ ...selectedFilters });
     setCurrentPage(1);
@@ -770,20 +599,17 @@ function ProductList({ searchTerm }) {
     setActiveFilter(null);
   };
 
-  // Перемикання "Більше"/"Менше"
+  // Toggle show more
   const toggleShowMore = (filterType) => {
-    setShowMore((prev) => ({
-      ...prev,
-      [filterType]: !prev[filterType],
-    }));
+    setShowMore((prev) => ({ ...prev, [filterType]: !prev[filterType] }));
   };
 
-  // Обробка пошуку брендів
+  // Handle brand search
   const handleBrandSearch = (e) => {
     setBrandSearch(e.target.value);
   };
 
-  // Обробка кастомного діапазону цін
+  // Handle custom price change
   const handleCustomPriceChange = (field, value) => {
     const numValue = value.replace(/[^0-9]/g, '');
     if (field === 'from') {
@@ -792,18 +618,12 @@ function ProductList({ searchTerm }) {
       setCustomPriceTo(numValue);
     }
     if (numValue !== '') {
-      setSelectedFilters((prev) => ({
-        ...prev,
-        priceRanges: [],
-      }));
-      setAppliedFilters((prev) => ({
-        ...prev,
-        priceRanges: [],
-      }));
+      setSelectedFilters((prev) => ({ ...prev, priceRanges: [] }));
+      setAppliedFilters((prev) => ({ ...prev, priceRanges: [] }));
     }
   };
 
-  // Обмеження кількості елементів для фільтрів
+  // Get visible filter items
   const getVisibleItems = useCallback((items, filterType) => {
     if (!items) return [];
 
@@ -813,20 +633,18 @@ function ProductList({ searchTerm }) {
       filteredItems = items.filter((brand) =>
         brand.toLowerCase().includes(brandSearch.toLowerCase())
       );
-      const topItems = filteredItems.slice(0, 12); // Top 12 brands (by count)
-      const remainingItems = filteredItems.slice(12); // Remaining brands
+      const topItems = filteredItems.slice(0, 12);
+      const remainingItems = filteredItems.slice(12);
       if (showMore.brands || filteredItems.length <= 12) {
-        // Keep top 12 in original order, sort remaining alphabetically
         return [...topItems, ...remainingItems.sort((a, b) => a.localeCompare(b))];
       }
       return topItems;
     }
 
     if (filterType === 'types') {
-      const topItems = filteredItems.slice(0, 6); // Top 6 types (by count)
-      const remainingItems = filteredItems.slice(6); // Remaining types
+      const topItems = filteredItems.slice(0, 6);
+      const remainingItems = filteredItems.slice(6);
       if (showMore.types || filteredItems.length <= 6) {
-        // Keep top 6 in original order, sort remaining alphabetically
         return [...topItems, ...remainingItems.sort((a, b) => a.localeCompare(b))];
       }
       return topItems;
@@ -845,12 +663,12 @@ function ProductList({ searchTerm }) {
     return items.slice(0, 12);
   }, [brandSearch, showMore]);
 
-  // Модифікація назви продукту
+  // Get product name
   const getProductName = (product) => {
     return `${product.name} (${product.volume || 'Об’єм не вказано'})`;
   };
 
-  // Пагінація
+  // Pagination
   const totalPages = Math.ceil(totalProducts / productsPerPage);
 
   const handlePageChange = (page) => {
@@ -880,7 +698,7 @@ function ProductList({ searchTerm }) {
     (isSearchPage ? (appliedFilters.categories?.length || 0) : 0) +
     (customPriceFrom !== '' && customPriceTo !== '' ? 1 : 0);
 
-  // Оновлення висоти контейнерів фільтрів при зміні showMore або brandSearch
+  // Update filter container heights
   useEffect(() => {
     Object.keys(showMore).forEach((filterType) => {
       const container = filterItemsRefs.current[filterType];
@@ -890,11 +708,9 @@ function ProductList({ searchTerm }) {
           const visibleItems = getVisibleItems(filters[filterType], filterType);
           const maxVisible = filterType === 'brands' || filterType === 'priceRanges' || filterType === 'volumes' ? 12 : 6;
           const isExpanded = showMore[filterType] || visibleItems.length <= maxVisible;
-          // Обчислюємо висоту для згорнутого стану
           const collapsedHeight = visibleItems.length > maxVisible
             ? items.scrollHeight * (maxVisible / filters[filterType].length)
             : items.scrollHeight;
-          // Встановлюємо max-height
           container.style.maxHeight = isExpanded
             ? `${items.scrollHeight}px`
             : `${collapsedHeight}px`;
@@ -915,7 +731,6 @@ function ProductList({ searchTerm }) {
         </div>
       )}
       <div className="product-list-container">
-        {/* Filters column */}
         <div className={`filters ${!isLoading ? 'loaded' : ''}`}>
           <div className="filters-header">
             <h3>Фільтри</h3>
@@ -925,9 +740,7 @@ function ProductList({ searchTerm }) {
                   appliedFilters.categories?.map((category) => (
                     <div key={`category-${category}`} className="selected-filter-tag">
                       <span>{categoryNames[category] || category}</span>
-                      <button onClick={() => removeFilter('categories', category)}>
-                        ×
-                      </button>
+                      <button onClick={() => removeFilter('categories', category)}>×</button>
                     </div>
                   ))}
                 {appliedFilters.brands?.map((brand) => (
@@ -938,26 +751,14 @@ function ProductList({ searchTerm }) {
                 ))}
                 {customPriceFrom !== '' && customPriceTo !== '' ? (
                   <div key="custom-price" className="selected-filter-tag">
-                    <span>
-                      {customPriceFrom}-{customPriceTo} грн
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCustomPriceFrom('');
-                        setCustomPriceTo('');
-                        applyFilters();
-                      }}
-                    >
-                      ×
-                    </button>
+                    <span>{customPriceFrom}-{customPriceTo} грн</span>
+                    <button onClick={() => { setCustomPriceFrom(''); setCustomPriceTo(''); applyFilters(); }}>×</button>
                   </div>
                 ) : (
                   appliedFilters.priceRanges?.map((range) => (
                     <div key={`price-${range}`} className="selected-filter-tag">
                       <span>{range}</span>
-                      <button onClick={() => removeFilter('priceRanges', range)}>
-                        ×
-                      </button>
+                      <button onClick={() => removeFilter('priceRanges', range)}>×</button>
                     </div>
                   ))
                 )}
@@ -974,61 +775,43 @@ function ProductList({ searchTerm }) {
                   </div>
                 ))}
                 {totalAppliedFilters > 1 && (
-                  <button className="reset-all-filters" onClick={resetAllFilters}>
-                    Скинути всі
-                  </button>
+                  <button className="reset-all-filters" onClick={resetAllFilters}>Скинути всі</button>
                 )}
               </div>
             )}
           </div>
 
-          {/* Category filter (only on /search) */}
           {isSearchPage && searchQuery && (
             <div className="filter-section">
               <h4>Категорія</h4>
-              <div
-                className="filter-items-container"
-                ref={(el) => (filterItemsRefs.current['categories'] = el)}
-              >
+              <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['categories'] = el)}>
                 <div className="filter-items filter-items-single-column">
-                  {getVisibleItems(filters.categories, 'categories').map(
-                    (category, index) => {
-                      const isDisabled = disabledFilters.categories.has(category);
-                      return (
-                        <label
-                          key={index}
-                          className={isDisabled ? 'disabled' : ''}
-                          ref={(el) => (filterRefs.current[`categories-${category}`] = el)}
-                        >
-                          <input
-                            type="checkbox"
-                            name="category"
-                            value={category}
-                            checked={
-                              selectedFilters.categories?.includes(category) || false
-                            }
-                            onChange={() => handleFilterChange('categories', category)}
-                            disabled={isDisabled}
-                          />
-                          {categoryNames[category] || category}
-                        </label>
-                      );
-                    }
-                  )}
+                  {getVisibleItems(filters.categories, 'categories').map((category, index) => {
+                    const isDisabled = disabledFilters.categories.has(category);
+                    return (
+                      <label key={index} className={isDisabled ? 'disabled' : ''} ref={(el) => (filterRefs.current[`categories-${category}`] = el)}>
+                        <input
+                          type="checkbox"
+                          name="category"
+                          value={category}
+                          checked={selectedFilters.categories?.includes(category) || false}
+                          onChange={() => handleFilterChange('categories', category)}
+                          disabled={isDisabled}
+                        />
+                        {categoryNames[category] || category}
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
               {filters.categories.length > 6 && (
-                <button
-                  className="show-more-btn"
-                  onClick={() => toggleShowMore('categories')}
-                >
+                <button className="show-more-btn" onClick={() => toggleShowMore('categories')}>
                   {showMore.categories ? 'Менше ↑' : 'Більше ↓'}
                 </button>
               )}
             </div>
           )}
 
-          {/* Brand filter */}
           <div className="filter-section">
             <h4>Бренд</h4>
             <input
@@ -1038,19 +821,14 @@ function ProductList({ searchTerm }) {
               value={brandSearch}
               onChange={handleBrandSearch}
             />
-            <div
-              className="filter-items-container"
-              ref={(el) => (filterItemsRefs.current['brands'] = el)}
-            >
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['brands'] = el)}>
               <div className="filter-items">
                 {getVisibleItems(filters.brands, 'brands').map((brand, index) => {
                   const isDisabled = disabledFilters.brands.has(brand);
                   return (
                     <label
                       key={index}
-                      className={`${brand.length > 13 ? 'span-two-columns' : ''} ${
-                        isDisabled ? 'disabled' : ''
-                      }`}
+                      className={`${brand.length > 13 ? 'span-two-columns' : ''} ${isDisabled ? 'disabled' : ''}`}
                       ref={(el) => (filterRefs.current[`brands-${brand}`] = el)}
                     >
                       <input
@@ -1068,16 +846,12 @@ function ProductList({ searchTerm }) {
               </div>
             </div>
             {filters.brands.length > 12 && (
-              <button
-                className="show-more-btn"
-                onClick={() => toggleShowMore('brands')}
-              >
+              <button className="show-more-btn" onClick={() => toggleShowMore('brands')}>
                 {showMore.brands ? 'Менше ↑' : 'Більше ↓'}
               </button>
             )}
           </div>
 
-          {/* Price filter */}
           <div className="filter-section">
             <h4>Ціна (грн)</h4>
             <div className="custom-price-inputs">
@@ -1096,67 +870,41 @@ function ProductList({ searchTerm }) {
                 className="price-input"
               />
             </div>
-            <div
-              className="filter-items-container"
-              ref={(el) => (filterItemsRefs.current['priceRanges'] = el)}
-            >
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['priceRanges'] = el)}>
               <div className="filter-items">
-                {getVisibleItems(filters.priceRanges, 'priceRanges').map(
-                  (range, index) => {
-                    const isDisabled = disabledFilters.priceRanges.has(range.label);
-                    return (
-                      <label
-                        key={index}
-                        className={isDisabled ? 'disabled' : ''}
-                        ref={(el) =>
-                          (filterRefs.current[`priceRanges-${range.label}`] = el)
-                        }
-                      >
-                        <input
-                          type="checkbox"
-                          name="priceRange"
-                          value={range.label}
-                          checked={
-                            selectedFilters.priceRanges?.includes(range.label) || false
-                          }
-                          onChange={() =>
-                            handleFilterChange('priceRanges', range.label)
-                          }
-                          disabled={isDisabled}
-                        />
-                        {range.label}
-                      </label>
-                    );
-                  }
-                )}
+                {getVisibleItems(filters.priceRanges, 'priceRanges').map((range, index) => {
+                  const isDisabled = disabledFilters.priceRanges.has(range.label);
+                  return (
+                    <label key={index} className={isDisabled ? 'disabled' : ''} ref={(el) => (filterRefs.current[`priceRanges-${range.label}`] = el)}>
+                      <input
+                        type="checkbox"
+                        name="priceRange"
+                        value={range.label}
+                        checked={selectedFilters.priceRanges?.includes(range.label) || false}
+                        onChange={() => handleFilterChange('priceRanges', range.label)}
+                        disabled={isDisabled}
+                      />
+                      {range.label}
+                    </label>
+                  );
+                })}
               </div>
             </div>
             {filters.priceRanges.length > 12 && (
-              <button
-                className="show-more-btn"
-                onClick={() => toggleShowMore('priceRanges')}
-              >
+              <button className="show-more-btn" onClick={() => toggleShowMore('priceRanges')}>
                 {showMore.priceRanges ? 'Менше ↑' : 'Більше ↓'}
               </button>
             )}
           </div>
 
-          {/* Volume filter */}
           <div className="filter-section">
             <h4>Об’єм</h4>
-            <div
-              className="filter-items-container"
-              ref={(el) => (filterItemsRefs.current['volumes'] = el)}
-            >
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['volumes'] = el)}>
               <div className="filter-items">
                 {getVisibleItems(filters.volumes, 'volumes').map((volume, index) => {
                   const isDisabled = disabledFilters.volumes.has(volume);
                   return (
-                    <label
-                      key={index}
-                      className={isDisabled ? 'disabled' : ''}
-                      ref={(el) => (filterRefs.current[`volumes-${volume}`] = el)}
-                    >
+                    <label key={index} className={isDisabled ? 'disabled' : ''} ref={(el) => (filterRefs.current[`volumes-${volume}`] = el)}>
                       <input
                         type="checkbox"
                         name="volume"
@@ -1172,31 +920,20 @@ function ProductList({ searchTerm }) {
               </div>
             </div>
             {filters.volumes.length > 12 && (
-              <button
-                className="show-more-btn"
-                onClick={() => toggleShowMore('volumes')}
-              >
+              <button className="show-more-btn" onClick={() => toggleShowMore('volumes')}>
                 {showMore.volumes ? 'Менше ↑' : 'Більше ↓'}
               </button>
             )}
           </div>
 
-          {/* Type filter */}
           <div className="filter-section">
             <h4>Тип</h4>
-            <div
-              className="filter-items-container"
-              ref={(el) => (filterItemsRefs.current['types'] = el)}
-            >
+            <div className="filter-items-container" ref={(el) => (filterItemsRefs.current['types'] = el)}>
               <div className="filter-items filter-items-single-column">
                 {getVisibleItems(filters.types, 'types').map((type, index) => {
                   const isDisabled = disabledFilters.types.has(type);
                   return (
-                    <label
-                      key={index}
-                      className={isDisabled ? 'disabled' : ''}
-                      ref={(el) => (filterRefs.current[`types-${type}`] = el)}
-                    >
+                    <label key={index} className={isDisabled ? 'disabled' : ''} ref={(el) => (filterRefs.current[`types-${type}`] = el)}>
                       <input
                         type="checkbox"
                         name="type"
@@ -1212,16 +949,12 @@ function ProductList({ searchTerm }) {
               </div>
             </div>
             {filters.types.length > 6 && (
-              <button
-                className="show-more-btn"
-                onClick={() => toggleShowMore('types')}
-              >
+              <button className="show-more-btn" onClick={() => toggleShowMore('types')}>
                 {showMore.types ? 'Менше ↑' : 'Більше ↓'}
               </button>
             )}
           </div>
 
-          {/* Плашка "Показати товари" */}
           {activeFilter && (
             <button
               className="filter-tag"
@@ -1230,14 +963,9 @@ function ProductList({ searchTerm }) {
               style={{
                 top: filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
                   ? `${
-                      filterRefs.current[
-                        `${activeFilter.type}-${activeFilter.value}`
-                      ].getBoundingClientRect().top -
-                      filterRefs.current[
-                        `${activeFilter.type}-${activeFilter.value}`
-                      ].closest('.filters').getBoundingClientRect().top +
-                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
-                        .offsetHeight / 2
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].getBoundingClientRect().top -
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].closest('.filters').getBoundingClientRect().top +
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].offsetHeight / 2
                     }px`
                   : '0px',
               }}
@@ -1246,38 +974,25 @@ function ProductList({ searchTerm }) {
             </button>
           )}
 
-          {/* Кнопка "Показати товари" */}
           <button className="apply-filters-btn" onClick={applyFilters}>
             Показати товари ({previewProductCount})
           </button>
         </div>
 
-        {/* Products column */}
         <div className="products">
           <div className={`products-list ${!isLoading ? 'loaded' : ''}`}>
             {filteredProducts.length > 0 ? (
               filteredProducts
                 .slice(
-                  isPaginated
-                    ? (currentPage - 1) * productsPerPage
-                    : (startPage - 1) * productsPerPage,
-                  isPaginated
-                    ? currentPage * productsPerPage
-                    : startPage * productsPerPage + loadMorePages * productsPerPage
+                  isPaginated ? (currentPage - 1) * productsPerPage : (startPage - 1) * productsPerPage,
+                  isPaginated ? currentPage * productsPerPage : startPage * productsPerPage + loadMorePages * productsPerPage
                 )
                 .map((product, index) => (
                   <div key={`${product.id}-${index}`} className="product-card-container">
-                    <Link
-                      to={`/product/${product.id}`}
-                      className="product-card"
-                    >
+                    <Link to={`/product/${product.id}`} className="product-card">
                       <h3>{getProductName(product)}</h3>
                       <img
-                        src={
-                          product.images && product.images.length > 0
-                            ? product.images[0]
-                            : '/img/placeholder.webp'
-                        }
+                        src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.webp'}
                         alt={product.name}
                         onError={(e) => (e.target.src = '/img/placeholder.webp')}
                       />
@@ -1313,13 +1028,10 @@ function ProductList({ searchTerm }) {
               !isLoading && <p>Товари не знайдено</p>
             )}
           </div>
-          {/* Пагінація та кнопка "Завантажити ще" */}
           {!isLoading && totalProducts > productsPerPage && (
             <div className="pagination-container">
               {((startPage - 1 + loadMorePages) * productsPerPage) < totalProducts && (
-                <button className="load-more-btn" onClick={handleLoadMore}>
-                  Завантажити ще
-                </button>
+                <button className="load-more-btn" onClick={handleLoadMore}>Завантажити ще</button>
               )}
               <div className="pagination">
                 <button
@@ -1332,9 +1044,7 @@ function ProductList({ searchTerm }) {
                 {pageNumbers.map((number) => (
                   <button
                     key={number}
-                    className={`pagination-btn ${
-                      currentPage === number ? 'active' : ''
-                    }`}
+                    className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
                     onClick={() => handlePageChange(number)}
                   >
                     {number}

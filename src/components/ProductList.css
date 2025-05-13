@@ -502,18 +502,27 @@
   top: 70px;
   right: 20px;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease, transform 0.2s ease; /* Smooth opacity and scale transition */
   z-index: 3;
 }
 
-.product-card-container:hover .heart-icon,
-.heart-icon.saved {
-  opacity: 1;
+.product-card-container:hover .heart-icon {
+  opacity: 1; /* Visible on hover */
 }
 
 .heart-icon:hover {
-  transform: scale(1.1);
+  transform: scale(1.1); /* Scale on hover */
+}
+
+.heart-icon.saved {
+  opacity: 0; /* Start hidden for animation */
+  transform: translateY(20px); /* Match product card's starting position */
+  animation: fadeInUp 0.5s ease-out forwards; /* Animate in with product card */
+}
+
+.heart-icon.saved:hover {
+  transform: scale(1.1); /* Scale on hover for saved hearts */
 }
 
 .heart-icon.saved svg {
