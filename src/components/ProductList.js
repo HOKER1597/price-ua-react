@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import './ProductList.css';
 import { categoryNames } from './Header.js';
@@ -7,7 +7,6 @@ import { categoryNames } from './Header.js';
 function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Отримуємо параметри з URL, враховуючи як 'query', так і 'search'
   const queryParams = new URLSearchParams(location.search);
