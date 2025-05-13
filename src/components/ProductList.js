@@ -1,4 +1,3 @@
-// ProductList.js
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -69,6 +68,7 @@ function ProductList({ searchTerm }) {
   const [isPaginated, setIsPaginated] = useState(true);
   const [startPage, setStartPage] = useState(1);
   const [loadMorePages, setLoadMorePages] = useState(1);
+  
 
   // State for brand search
   const [brandSearch, setBrandSearch] = useState('');
@@ -325,7 +325,7 @@ function ProductList({ searchTerm }) {
           const productIds = productsData.map(p => p.id);
           try {
             const savedResponse = await axios.post(
-              'https://price-ua-react-backend.onrender.com/saved-products personally',
+              'https://price-ua-react-backend.onrender.com/saved-products/bulk',
               { productIds },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -458,12 +458,11 @@ function ProductList({ searchTerm }) {
         setSavedProducts(new Set());
       } finally {
         setIsLoading(false);
-        console.log('fetchProducts completed');
       }
     };
 
     fetchProducts();
-  }, [categoryId, searchQuery, initialType, isSearchPage, token, user]);
+  }, [categoryId, searchQuery, initialType, isSearchPage, token]); // Removed user from dependencies
 
   // Update preview count and disabled filters
   useEffect(() => {

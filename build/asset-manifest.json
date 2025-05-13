@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.417e7f46.css",
-    "main.js": "/static/js/main.3a36fd2c.js",
+    "main.css": "/static/css/main.c57c7f54.css",
+    "main.js": "/static/js/main.9c3b247f.js",
     "static/media/news2.avif": "/static/media/news2.5113d10229fe04bd60eb.avif",
     "static/media/news6.avif": "/static/media/news6.c8b4dd412775cd2950fa.avif",
     "static/media/news7.avif": "/static/media/news7.a23fdc395f6c088f098a.avif",
@@ -16,11 +16,11 @@
     "static/media/logo_silpo.svg": "/static/media/logo_silpo.22b56262ed5709aef808f3474fd92553.svg",
     "static/media/logo_eva.svg": "/static/media/logo_eva.ed55efc65aa2190120df938a414b2457.svg",
     "index.html": "/index.html",
-    "main.417e7f46.css.map": "/static/css/main.417e7f46.css.map",
-    "main.3a36fd2c.js.map": "/static/js/main.3a36fd2c.js.map"
+    "main.c57c7f54.css.map": "/static/css/main.c57c7f54.css.map",
+    "main.9c3b247f.js.map": "/static/js/main.9c3b247f.js.map"
   },
   "entrypoints": [
-    "static/css/main.417e7f46.css",
-    "static/js/main.3a36fd2c.js"
+    "static/css/main.c57c7f54.css",
+    "static/js/main.9c3b247f.js"
   ]
 }
