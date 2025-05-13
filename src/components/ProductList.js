@@ -68,7 +68,6 @@ function ProductList({ searchTerm }) {
   const [isPaginated, setIsPaginated] = useState(true);
   const [startPage, setStartPage] = useState(1);
   const [loadMorePages, setLoadMorePages] = useState(1);
-  
 
   // State for brand search
   const [brandSearch, setBrandSearch] = useState('');
@@ -462,7 +461,7 @@ function ProductList({ searchTerm }) {
     };
 
     fetchProducts();
-  }, [categoryId, searchQuery, initialType, isSearchPage, token]); // Removed user from dependencies
+  }, [categoryId, searchQuery, initialType, isSearchPage, user, token]);
 
   // Update preview count and disabled filters
   useEffect(() => {
