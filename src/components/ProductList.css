@@ -491,3 +491,69 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* New styles for wishlist feature */
+.product-card-container {
+  position: relative;
+}
+
+.heart-icon {
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 3;
+}
+
+.product-card-container:hover .heart-icon,
+.heart-icon.saved {
+  opacity: 1;
+}
+
+.heart-icon:hover {
+  transform: scale(1.1);
+}
+
+.heart-icon.saved svg {
+  fill: #ff0000; /* Red fill for saved state */
+}
+
+.login-prompt {
+  position: absolute;
+  top: -45px; /* Above the heart icon */
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+  z-index: 4;
+  opacity: 0;
+  animation: fadeInPrompt 0.3s ease forwards;
+  white-space: nowrap;
+}
+
+.login-prompt .login-link {
+  color: #0288d1; /* Matches your button color */
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-prompt .login-link:hover {
+  color: #01579b; /* Matches your button hover color */
+}
+
+@keyframes fadeInPrompt {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

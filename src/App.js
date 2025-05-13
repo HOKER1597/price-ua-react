@@ -7,6 +7,7 @@ import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import Login from './components/Login';
 import Account from './components/Account';
+// import Wishlist from './components/Wishlist';
 import './App.css';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
             <Route path="/search" element={<ProductList searchTerm={searchTerm} />} />
             <Route path="/login" element={<Login />} />
             <Route path="/account" element={<Account />} />
+            {/* <Route path="/wishlist" element={<Wishlist />} /> */}
           </Routes>
         </div>
       </div>

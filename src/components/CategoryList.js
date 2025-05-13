@@ -59,12 +59,14 @@ const extendedCompanies = Array(EXTEND_FACTOR).fill(companies).flat();
 // Групи для бічної панелі
 const groups = [
   { id: 'makeup', name: 'Макіяж' },
-  { id: 'face', name: 'Обличчя' },
-  { id: 'hair', name: 'Волосся' },
-  { id: 'body', name: 'Тіло' },
-  { id: 'dermocosmetics', name: 'Дерматокосметика' },
-  { id: 'professional', name: 'Професійна косметика' },
+  { id: 'skincare', name: 'Догляд за шкірою' },
+  { id: 'haircare', name: 'Догляд за волоссям' },
+  { id: 'men-care', name: 'Чоловічий догляд' },
+  { id: 'child-care', name: 'Дитячий догляд' },
+  { id: 'natural-cosmetics', name: 'Натуральна косметика' },
   { id: 'perfumery', name: 'Парфумерія' },
+  { id: 'accessories', name: 'Аксесуари' },
+  { id: 'gift-sets', name: 'Набори/Подарунки' },
 ];
 
 function CategoryList() {

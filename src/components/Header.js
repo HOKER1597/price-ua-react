@@ -340,7 +340,11 @@ function Header({ setSearchTerm }) {
                   >
                     Аккаунт
                   </div>
-                  <div className="context-menu-item" onClick={() => setShowContextMenu(false)}>
+                  <div className="context-menu-item" 
+                  onClick={() => {
+                      // navigate('/wishlist');
+                      setShowContextMenu(false);
+                    }}>
                     Бажане
                   </div>
                   <div className="context-menu-item" onClick={handleLogout}>

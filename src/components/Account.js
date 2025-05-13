@@ -10,6 +10,12 @@ function Account() {
   const [birthDate, setBirthDate] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [animate, setAnimate] = useState(false);
+  const [fieldAnimations, setFieldAnimations] = useState({
+    email: false,
+    gender: false,
+    birthDate: false,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,7 +25,10 @@ function Account() {
       setUser(parsedUser);
       setEmail(parsedUser.email || '');
       setGender(parsedUser.gender || '');
-      setBirthDate(parsedUser.birth_date || '');
+      setBirthDate(parsedUser.birth_date ? parsedUser.birth_date.split('T')[0] : '');
+      // Start animations
+      setAnimate(true);
+      setTimeout(() => setFieldAnimations({ email: true, gender: true, birthDate: true }), 100);
     } else {
       navigate('/login');
     }
@@ -53,7 +62,7 @@ function Account() {
 
   return (
     <div className="account-page">
-      <div className="account-container">
+      <div className={`account-container ${animate ? 'animate' : ''}`}>
         <div className="account-header">
           <div className="account-avatar">
             <svg
@@ -81,14 +90,14 @@ function Account() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="account-input"
+            className={`account-input ${fieldAnimations.email ? 'field-animate' : ''}`}
             placeholder="Введіть пошту"
           />
           <label className="account-label">Гендер</label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="account-input"
+            className={`account-input ${fieldAnimations.gender ? 'field-animate' : ''}`}
           >
             <option value="">Оберіть гендер</option>
             <option value="male">Чоловік</option>
@@ -100,7 +109,7 @@ function Account() {
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
-            className="account-input"
+            className={`account-input ${fieldAnimations.birthDate ? 'field-animate' : ''}`}
           />
           <button onClick={handleUpdate} className="account-button">
             Оновити дані

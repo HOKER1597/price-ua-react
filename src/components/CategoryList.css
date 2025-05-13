@@ -29,7 +29,7 @@ body {
 /* Categories sidebar */
 .categories-sidebar {
   width: 200px;
-  height: 480px;
+  height: 510px;
   flex-shrink: 0;
   background-color: #ff69b4;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -55,7 +55,7 @@ body {
 
 .category-group {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Reduced margin to fit all categories */
   border-bottom: 1px solid #000000; /* Black dividing line */
   padding-bottom: 10px; /* Space between text and line */
   transition: transform 0.2s ease;
@@ -78,7 +78,7 @@ body {
 }
 
 .group-name {
-  font-size: 18px;
+  font-size: 16px; /* Reduced font size to fit all categories */
   font-weight: 600;
   color: #333;
   padding: 10px 0;

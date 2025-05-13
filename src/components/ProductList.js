@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ProductList.css';
 import { categoryNames } from './Header.js';
@@ -7,6 +7,7 @@ import { categoryNames } from './Header.js';
 function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Отримуємо параметри з URL, враховуючи як 'query', так і 'search'
   const queryParams = new URLSearchParams(location.search);
@@ -92,16 +93,93 @@ function ProductList({ searchTerm }) {
   // Стан для індикатора завантаження
   const [isLoading, setIsLoading] = useState(true);
 
+  // Стан для статусу збереження продуктів
+  const [savedProducts, setSavedProducts] = useState(new Set());
+  // Стан для показу повідомлення про логін
+  const [showLoginPrompt, setShowLoginPrompt] = useState({});
+
   // Рефи для позиціонування плашки та анімації фільтрів
   const filterRefs = useRef({});
   const tagRef = useRef(null);
   const filterItemsRefs = useRef({});
+
+  // Перевірка авторизації користувача
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
 
   // Функція для отримання мінімальної ціни з store_prices
   const getMinPrice = (storePrices) => {
     if (!storePrices || storePrices.length === 0) return 0;
     return Math.min(...storePrices.map(sp => sp.price));
   };
+
+  // Завантаження статусу збереження продуктів
+  const fetchSavedStatus = useCallback(async () => {
+    if (!user || !token) {
+      setSavedProducts(new Set());
+      return;
+    }
+    try {
+      const promises = filteredProducts.map(product =>
+        axios.get(`https://price-ua-react-backend.onrender.com/saved-products/${product.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      );
+      const responses = await Promise.all(promises);
+      const savedSet = new Set();
+      responses.forEach((response, index) => {
+        if (response.data.isSaved) {
+          savedSet.add(filteredProducts[index].id);
+        }
+      });
+      setSavedProducts(savedSet);
+    } catch (error) {
+      console.error('Помилка завантаження статусу збереження:', error);
+    }
+  }, [filteredProducts, user, token]);
+
+  // Обробка кліку на сердечко
+  const handleHeartClick = async (productId, event) => {
+    event.preventDefault(); // Запобігаємо переходу за посиланням
+    if (!user || !token) {
+      setShowLoginPrompt(prev => ({ ...prev, [productId]: true }));
+      setTimeout(() => {
+        setShowLoginPrompt(prev => ({ ...prev, [productId]: false }));
+      }, 3000);
+      return;
+    }
+
+    const isSaved = savedProducts.has(productId);
+    try {
+      if (isSaved) {
+        await axios.delete(`https://price-ua-react-backend.onrender.com/saved-products/${productId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedProducts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+      } else {
+        await axios.post(
+          'https://price-ua-react-backend.onrender.com/saved-products',
+          { productId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setSavedProducts(prev => new Set(prev).add(productId));
+      }
+    } catch (error) {
+      console.error('Помилка при зміні статусу збереження:', error);
+      alert('Не вдалося оновити статус бажаного. Спробуйте ще раз.');
+    }
+  };
+
+  // Завантаження статусу збереження при зміні filteredProducts
+  useEffect(() => {
+    if (!isLoading && filteredProducts.length > 0) {
+      fetchSavedStatus();
+    }
+  }, [filteredProducts, isLoading, fetchSavedStatus]);
 
   // Функція для попередньої фільтрації (для previewProductCount та disabledFilters)
   const calculateFilteredProducts = useCallback((tempFilters) => {
@@ -1189,24 +1267,48 @@ function ProductList({ searchTerm }) {
                     : startPage * productsPerPage + loadMorePages * productsPerPage
                 )
                 .map((product, index) => (
-                  <Link
-                    to={`/product/${product.id}`}
-                    key={`${product.id}-${index}`}
-                    className="product-card"
-                  >
-                    <h3>{getProductName(product)}</h3>
-                    <img
-                      src={
-                        product.images && product.images.length > 0
-                          ? product.images[0]
-                          : '/img/placeholder.webp'
-                      }
-                      alt={product.name}
-                      onError={(e) => (e.target.src = '/img/placeholder.webp')}
-                    />
-                    <p className="price">{getMinPrice(product.store_prices)} грн</p>
-                    <p>{product.description || 'Опис відсутній'}</p>
-                  </Link>
+                  <div key={`${product.id}-${index}`} className="product-card-container">
+                    <Link
+                      to={`/product/${product.id}`}
+                      className="product-card"
+                    >
+                      <h3>{getProductName(product)}</h3>
+                      <img
+                        src={
+                          product.images && product.images.length > 0
+                            ? product.images[0]
+                            : '/img/placeholder.webp'
+                        }
+                        alt={product.name}
+                        onError={(e) => (e.target.src = '/img/placeholder.webp')}
+                      />
+                      <p className="price">{getMinPrice(product.store_prices)} грн</p>
+                      <p>{product.description || 'Опис відсутній'}</p>
+                    </Link>
+                    <div
+                      className={`heart-icon ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                      onClick={(e) => handleHeartClick(product.id, e)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill={savedProducts.has(product.id) ? '#d32f2f' : 'none'}
+                        stroke="#d32f2f"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                      </svg>
+                    </div>
+                    {showLoginPrompt[product.id] && (
+                      <div className="login-prompt">
+                        Увійдіть в <Link to="/login" className="login-link">аккаунт</Link> щоб додати до бажаного
+                      </div>
+                    )}
+                  </div>
                 ))
             ) : (
               !isLoading && <p>Товари не знайдено</p>
