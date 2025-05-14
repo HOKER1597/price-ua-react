@@ -82,6 +82,7 @@ function CategoryList() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [error, setError] = useState(null);
+  const [subcategoryShowMore, setSubcategoryShowMore] = useState({}); // New state for per-subcategory show more
   const carouselIntervalRef = useRef(null);
   const productIntervalRef = useRef(null);
   const totalHeroSlides = carouselImages.length;
@@ -171,7 +172,7 @@ function CategoryList() {
     };
   }, [startCarouselTimer, startProductTimer]);
 
-  // Handle manual navigation for hero carousel and reset timer
+  // Handle manual navigation for hero carousel and reset carsousel timer
   const goToSlide = (index) => {
     setIsHeroTransitioning(true);
     setCurrentSlide(index);
@@ -242,6 +243,15 @@ function CategoryList() {
       setIsClosing(false);
       setActiveGroup(null);
     }, 200); // Тривалість dropdownFadeOut
+  };
+
+
+  // Toggle show more for individual subcategory groups
+  const toggleSubcategoryShowMore = (groupId, categoryId) => {
+    setSubcategoryShowMore((prev) => ({
+      ...prev,
+      [`${groupId}-${categoryId}`]: !prev[`${groupId}-${categoryId}`],
+    }));
   };
 
   // Function to render star rating
@@ -318,10 +328,10 @@ function CategoryList() {
                       {subcategory.category}
                     </Link>
                     <ul className="subcategory-list">
-                      {subcategory.items.map(item => (
+                      {subcategory.items.slice(0, subcategoryShowMore[`${activeGroup}-${subcategory.categoryId}`] ? undefined : 3).map(item => (
                         <li key={item.id}>
                           <Link
-                            to={`/category/${subcategory.categoryId}${item.type ? `?type=${encodeURIComponent(item.type)}` : ''}`}
+                            to={`/category/${item.id}`}
                             className="subcategory-link animate-subcategory-link"
                           >
                             {item.name}
@@ -329,6 +339,14 @@ function CategoryList() {
                         </li>
                       ))}
                     </ul>
+                    {subcategory.items.length > 3 && (
+                      <button
+                        className="subcategory-show-more-btn"
+                        onClick={() => toggleSubcategoryShowMore(activeGroup, subcategory.categoryId)}
+                      >
+                        {subcategoryShowMore[`${activeGroup}-${subcategory.categoryId}`] ? 'Менше ↑' : 'Більше ↓'}
+                      </button>
+                    )}
                   </div>
                 ))}
                 <div className="subcategory-group">

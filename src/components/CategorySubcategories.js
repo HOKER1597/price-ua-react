@@ -2,50 +2,50 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import './CategorySubcategories.css';
 
-// Дані підкатегорій на основі структури з документу
+// Дані підкатегорій з очищеними назвами
 export const subcategoriesData = {
   makeup: [
     {
       category: 'Обличчя',
       categoryId: 'face-makeup',
       items: [
-        { id: 'foundation', name: 'Тональні основи (рідкі, компактні, стіки)' },
-        { id: 'concealer', name: 'Консилери (під очі, точкові)' },
-        { id: 'powder', name: 'Пудри (розсипчасті, компактні)' },
-        { id: 'blush', name: 'Рум’яна (кремові, сухі)' },
-        { id: 'highlighter', name: 'Хайлайтери (пудрові, рідкі)' },
+        { id: 'foundation', name: 'Тональні основи' },
+        { id: 'concealer', name: 'Консилери' },
+        { id: 'powder', name: 'Пудри' },
+        { id: 'blush', name: 'Рум’яна' },
+        { id: 'highlighter', name: 'Хайлайтери' },
         { id: 'bronzer', name: 'Бронзери' },
-        { id: 'primer', name: 'Бази/праймери (матуючі, зволожуючі, з ефектом сяяння)' },
+        { id: 'primer', name: 'Бази/праймери' },
       ],
     },
     {
       category: 'Очі',
       categoryId: 'eyes',
       items: [
-        { id: 'eyeshadow', name: 'Тіні для повік (одиночні, палітри, кремові)' },
-        { id: 'eyeliner', name: 'Підводки (рідкі, гелеві, фломастери)' },
+        { id: 'eyeshadow', name: 'Тіні для повік' },
+        { id: 'eyeliner', name: 'Підводки' },
         { id: 'eye-pencil', name: 'Олівці для очей' },
-        { id: 'mascara', name: 'Туші (обʼєм, подовження, водостійкі)' },
+        { id: 'mascara', name: 'Туші' },
         { id: 'eyeshadow-base', name: 'Бази під тіні' },
-        { id: 'brow-products', name: 'Засоби для брів (олівці, гелі, тіні, фіксатори, маркери, сироватки)' },
+        { id: 'brow-products', name: 'Засоби для брів' },
       ],
     },
     {
       category: 'Губи',
       categoryId: 'lips',
       items: [
-        { id: 'lipstick', name: 'Помади (матові, глянцеві, сатинові)' },
+        { id: 'lipstick', name: 'Помади' },
         { id: 'lipgloss', name: 'Блиски' },
-        { id: 'lipliner', name: 'Олівці (контурні, моделюючі)' },
-        { id: 'lip-balm', name: 'Бальзами (з SPF, кольорові)' },
-        { id: 'lip-tint', name: 'Тінти (гель, крем)' },
+        { id: 'lipliner', name: 'Олівці' },
+        { id: 'lip-balm', name: 'Бальзами' },
+        { id: 'lip-tint', name: 'Тінти' },
       ],
     },
     {
       category: 'Інструменти',
       categoryId: 'makeup-tools',
       items: [
-        { id: 'brushes', name: 'Пензлі (для тону, пудри, очей)' },
+        { id: 'brushes', name: 'Пензлі' },
         { id: 'sponges', name: 'Спонжі' },
         { id: 'brow-brushes', name: 'Щіточки для брів' },
         { id: 'applicators', name: 'Аплікатори' },
@@ -84,11 +84,11 @@ export const subcategoriesData = {
       categoryId: 'serums',
       items: [
         { id: 'vitamin-c-serum', name: 'З вітаміном С' },
-        { id: 'niacinamide-serum', name: 'Ніацинамідом' },
-        { id: 'hyaluronic-acid-serum', name: 'Гіалуроновою кислотою' },
-        { id: 'peptide-serum', name: 'Пептидами' },
-        { id: 'retinol-serum', name: 'Ретинолом' },
-        { id: 'aha-bha-serum', name: 'AHA/BHA кислотами' },
+        { id: 'niacinamide-serum', name: 'Ніацинамід' },
+        { id: 'hyaluronic-acid-serum', name: 'Гіалуронова кислота' },
+        { id: 'peptide-serum', name: 'Пептиди' },
+        { id: 'retinol-serum', name: 'Ретинол' },
+        { id: 'aha-bha-serum', name: 'AHA/BHA кислоти' },
       ],
     },
     {
@@ -105,11 +105,11 @@ export const subcategoriesData = {
       category: 'Живлення',
       categoryId: 'nourishing',
       items: [
-        { id: 'masks', name: 'Маски (тканинні, кремові, нічні)' },
+        { id: 'masks', name: 'Маски' },
         { id: 'face-oils', name: 'Олії для обличчя' },
         { id: 'balms', name: 'Бальзами' },
-        { id: 'eye-care', name: 'Зона навколо очей: Креми, Гелі, Патчі' },
-        { id: 'spf', name: 'Захист: SPF (креми, спреї, флюїди)' },
+        { id: 'eye-care', name: 'Зона навколо очей' },
+        { id: 'spf', name: 'Захист SPF' },
         { id: 'anti-pollution', name: 'Антиполюшн' },
       ],
     },
@@ -142,7 +142,7 @@ export const subcategoriesData = {
         { id: 'body-lotion', name: 'Лосьйони' },
         { id: 'body-oil', name: 'Олії' },
         { id: 'body-butter', name: 'Батери' },
-        { id: 'deodorant', name: 'Дезодоранти (антиперспіранти, натуральні)' },
+        { id: 'deodorant', name: 'Дезодоранти' },
         { id: 'post-epilation', name: 'Засоби після епіляції' },
         { id: 'anti-cellulite', name: 'Антицелюлітні креми' },
         { id: 'firming-cream', name: 'Креми з ефектом підтягнення' },
@@ -153,7 +153,7 @@ export const subcategoriesData = {
       category: 'Руки та ноги',
       categoryId: 'hands-feet',
       items: [
-        { id: 'hand-cream', name: 'Креми (зволожуючі, живильні)' },
+        { id: 'hand-cream', name: 'Креми' },
         { id: 'hand-foot-mask', name: 'Маски' },
         { id: 'cuticle-care', name: 'Засоби для кутикули' },
         { id: 'glass-nail-file', name: 'Скляні пилочки' },
@@ -167,7 +167,7 @@ export const subcategoriesData = {
       category: 'Очищення',
       categoryId: 'hair-cleansing',
       items: [
-        { id: 'shampoo', name: 'Шампуні (для жирного, сухого, нормального, фарбованого волосся, безсульфатні, дитячі)' },
+        { id: 'shampoos', name: 'Шампуні' },
         { id: 'scalp-scrub', name: 'Скраби для шкіри голови' },
         { id: 'scalp-peeling', name: 'Пілінги' },
       ],
@@ -176,15 +176,15 @@ export const subcategoriesData = {
       category: 'Кондиціонування',
       categoryId: 'conditioning',
       items: [
-        { id: 'conditioner', name: 'Кондиціонери (зволожуючі, відновлюючі, без змивання)' },
-        { id: 'balm', name: 'Бальзами (для легкого розчісування, проти ламкості)' },
+        { id: 'conditioner', name: 'Кондиціонери' },
+        { id: 'balm', name: 'Бальзами' },
       ],
     },
     {
       category: 'Інтенсивний догляд',
       categoryId: 'intensive-care',
       items: [
-        { id: 'hair-mask', name: 'Маски (живильні, зволожуючі, відновлюючі, кератинові)' },
+        { id: 'hair-mask', name: 'Маски' },
         { id: 'ampoules', name: 'Ампули' },
       ],
     },
@@ -192,8 +192,8 @@ export const subcategoriesData = {
       category: 'Сироватки та олії',
       categoryId: 'hair-serums-oils',
       items: [
-        { id: 'serum', name: 'Сироватки (для росту, блиску, проти випадіння, відновлюючі)' },
-        { id: 'oil', name: 'Олії (арганова, кокосова, касторова, реп’яхова, комплексні)' },
+        { id: 'serum', name: 'Сироватки' },
+        { id: 'oil', name: 'Олії' },
       ],
     },
     {
@@ -221,7 +221,7 @@ export const subcategoriesData = {
       category: 'Фарбування',
       categoryId: 'hair-coloring',
       items: [
-        { id: 'hair-dye', name: 'Фарби (постійні, напівперманентні, рослинні: хна, басма)' },
+        { id: 'hair-dye', name: 'Фарби' },
         { id: 'toner', name: 'Тоніки' },
         { id: 'lightener', name: 'Освітлювачі' },
         { id: 'post-color-care', name: 'Засоби після фарбування' },
@@ -240,8 +240,8 @@ export const subcategoriesData = {
       category: 'Інструменти',
       categoryId: 'hair-tools',
       items: [
-        { id: 'combs-brushes', name: 'Гребінці та щітки (масажні, керамічні, розплутуючі)' },
-        { id: 'hair-dryers-stylers', name: 'Фени, плойки, випрямлячі, стайлери, термобігуді' },
+        { id: 'comprzed-brushes', name: 'Гребінці та щітки' },
+        { id: 'hair-dryers-stylers', name: 'Фени, плойки, випрямлячі, стайлери' },
       ],
     },
     {
@@ -261,8 +261,8 @@ export const subcategoriesData = {
       categoryId: 'shaving',
       items: [
         { id: 'shaving-foam', name: 'Піна, Гель, Креми' },
-        { id: 'aftershave', name: 'Після гоління: Лосьйони, Бальзами' },
-        { id: 'beard-care', name: 'Догляд за бородою: Масло, Бальзам, Віск, Шампуні для бороди' },
+        { id: 'aftershave', name: 'Після гоління' },
+        { id: 'beard-care', name: 'Догляд за бородою' },
       ],
     },
     {
@@ -299,8 +299,8 @@ export const subcategoriesData = {
       categoryId: 'child-cleansing',
       items: [
         { id: 'child-shampoo', name: 'Дитячі шампуні' },
-        { id: 'child-shower-gel', name: 'Гелі для душу / Пінки' },
-        { id: 'child-soap', name: 'Мило (рідке та тверде)' },
+        { id: 'child-shower-gel', name: 'Гелі для душу' },
+        { id: 'child-soap', name: 'Мило' },
         { id: 'child-wipes', name: 'Вологі серветки' },
       ],
     },
@@ -308,11 +308,11 @@ export const subcategoriesData = {
       category: 'Догляд за тілом',
       categoryId: 'child-body-care',
       items: [
-        { id: 'child-cream', name: 'Креми (зволожуючі, захисні)' },
+        { id: 'child-cream', name: 'Креми' },
         { id: 'child-lotion', name: 'Лосьйони та молочко' },
-        { id: 'child-oil', name: 'Олії (масажні, для тіла)' },
+        { id: 'child-oil', name: 'Олії' },
         { id: 'child-powder', name: 'Пудра для тіла' },
-        { id: 'diaper-rash-cream', name: 'Засоби від попрілостей (креми, мазі)' },
+        { id: 'diaper-rash-cream', name: 'Засоби від попрілостей' },
       ],
     },
     {
@@ -373,21 +373,21 @@ export const subcategoriesData = {
       category: 'Догляд за обличчям',
       categoryId: 'natural-face-care',
       items: [
-        { id: 'natural-cream', name: 'Креми на основі натуральних інгредієнтів' },
-        { id: 'natural-cleansing', name: 'Очищення: гелі, пінки, міцелярна вода' },
-        { id: 'natural-mask', name: 'Маски з глини, фруктів, масел' },
-        { id: 'natural-toner', name: 'Тоніки без спирту' },
-        { id: 'natural-serum', name: 'Сироватки з гіалуроном, рослинними екстрактами' },
+        { id: 'natural-cream', name: 'Креми' },
+        { id: 'natural-cleansing', name: 'Очищення' },
+        { id: 'natural-mask', name: 'Маски' },
+        { id: 'natural-toner', name: 'Тоніки' },
+        { id: 'natural-serum', name: 'Сироватки' },
       ],
     },
     {
       category: 'Догляд за тілом',
       categoryId: 'natural-body-care',
       items: [
-        { id: 'natural-scrub', name: 'Скраби з кави, солі, цукру' },
-        { id: 'natural-body-oil', name: 'Олії для тіла (кокосова, мигдальна, жожоба)' },
-        { id: 'natural-deodorant', name: 'Натуральні дезодоранти' },
-        { id: 'natural-cream-lotion', name: 'Креми й лосьйони без парабенів' },
+        { id: 'natural-scrub', name: 'Скраби' },
+        { id: 'natural-body-oil', name: 'Олії для тіла' },
+        { id: 'natural-deodorant', name: 'Дезодоранти' },
+        { id: 'natural-cream-lotion', name: 'Креми й лосьйони' },
         { id: 'natural-soap', name: 'Мило ручної роботи' },
       ],
     },
@@ -395,8 +395,8 @@ export const subcategoriesData = {
       category: 'Догляд за волоссям',
       categoryId: 'natural-hair-care',
       items: [
-        { id: 'natural-shampoo', name: 'Шампуні без сульфатів та силіконів' },
-        { id: 'natural-mask-balm', name: 'Маски та бальзами з натуральними компонентами' },
+        { id: 'natural-shampoo', name: 'Шампуні' },
+        { id: 'natural-mask-balm', name: 'Маски та бальзами' },
         { id: 'natural-hair-oil', name: 'Олії для зміцнення волосся' },
         { id: 'natural-hydrolate', name: 'Гідролати для шкіри голови' },
       ],
@@ -406,17 +406,17 @@ export const subcategoriesData = {
       categoryId: 'natural-makeup',
       items: [
         { id: 'mineral-makeup', name: 'Мінеральна косметика' },
-        { id: 'natural-lipstick', name: 'Помади з рослинними оліями' },
-        { id: 'natural-foundation', name: 'Тональні основи на водній/масляній основі' },
-        { id: 'natural-mascara', name: 'Натуральна туш для вій' },
+        { id: 'natural-lipstick', name: 'Помади' },
+        { id: 'natural-foundation', name: 'Тональні основи' },
+        { id: 'natural-mascara', name: 'Туш для вій' },
       ],
     },
     {
       category: 'Догляд за губами',
       categoryId: 'natural-lip-care',
       items: [
-        { id: 'natural-lip-balm', name: 'Бальзами на основі бджолиного воску' },
-        { id: 'natural-lip-scrub', name: 'Скраби для губ з натуральних інгредієнтів' },
+        { id: 'natural-lip-balm', name: 'Бальзами' },
+        { id: 'natural-lip-scrub', name: 'Скраби для губ' },
       ],
     },
     {
@@ -424,15 +424,15 @@ export const subcategoriesData = {
       categoryId: 'natural-child-care',
       items: [
         { id: 'hypoallergenic-cream', name: 'Гіпоалергенні креми' },
-        { id: 'organic-shampoo-gel', name: 'Органічні шампуні та гелі для купання' },
+        { id: 'organic-shampoo-gel', name: 'Органічні шампуні та гелі' },
       ],
     },
     {
       category: 'Для чоловіків',
       categoryId: 'natural-men-care',
       items: [
-        { id: 'natural-aftershave', name: 'Натуральні засоби після гоління' },
-        { id: 'natural-men-cream-gel', name: 'Креми й гелі для обличчя з рослинними компонентами' },
+        { id: 'natural-aftershave', name: 'Засоби після гоління' },
+        { id: 'natural-men-cream-gel', name: 'Креми й гелі для обличчя' },
       ],
     },
     {
@@ -441,7 +441,7 @@ export const subcategoriesData = {
       items: [
         { id: 'essential-oils', name: 'Ефірні олії' },
         { id: 'aroma-rollers', name: 'Аромаролики' },
-        { id: 'natural-spray', name: 'Спреї для обличчя та тіла з натуральними ароматами' },
+        { id: 'natural-spray', name: 'Спреї для обличчя та тіла' },
       ],
     },
     {
@@ -449,7 +449,7 @@ export const subcategoriesData = {
       categoryId: 'certification-brands',
       items: [
         { id: 'certifications', name: 'ECOCERT, COSMOS, USDA Organic' },
-        { id: 'ukrainian-brands', name: 'Українські виробники натуральної косметики' },
+        { id: 'ukrainian-brands', name: 'Українські виробники' },
       ],
     },
   ],
@@ -461,7 +461,7 @@ export const subcategoriesData = {
         { id: 'women-eau-de-parfum', name: 'Парфумована вода' },
         { id: 'women-eau-de-toilette', name: 'Туалетна вода' },
         { id: 'women-perfume', name: 'Парфуми' },
-        { id: 'women-deodorant-spray', name: 'Дезодоранти-спреї з ароматом' },
+        { id: 'women-deodorant-spray', name: 'Дезодоранти-спреї' },
         { id: 'women-perfume-set', name: 'Набори парфумів' },
         { id: 'women-travel-size', name: 'Мініверсії/тревел-формат' },
       ],
@@ -473,7 +473,7 @@ export const subcategoriesData = {
         { id: 'men-eau-de-toilette', name: 'Туалетна вода' },
         { id: 'men-eau-de-parfum', name: 'Парфумована вода' },
         { id: 'men-cologne', name: 'Одеколони' },
-        { id: 'men-deodorant-spray', name: 'Дезодоранти з ароматом' },
+        { id: 'men-deodorant-spray', name: 'Дезодоранти' },
         { id: 'men-perfume-set', name: 'Набори парфумів' },
         { id: 'men-travel-size', name: 'Мініверсії/тревел-формат' },
       ],
@@ -501,7 +501,7 @@ export const subcategoriesData = {
       category: 'Домашня парфумерія',
       categoryId: 'home-fragrance',
       items: [
-        { id: 'diffusers', name: 'Ароматизатори для дому (дифузори, свічки)' },
+        { id: 'diffusers', name: 'Ароматизатори для дому' },
         { id: 'linen-spray', name: 'Спреї для білизни та приміщень' },
       ],
     },
@@ -527,7 +527,7 @@ export const subcategoriesData = {
       category: 'Аксесуари для макіяжу',
       categoryId: 'makeup-accessories',
       items: [
-        { id: 'makeup-brushes', name: 'Пензлі (для тону, тіней, рум’ян тощо)' },
+        { id: 'makeup-brushes', name: 'Пензлі' },
         { id: 'sponges-blenders', name: 'Спонжі та блендери' },
         { id: 'shadow-applicators', name: 'Аплікатори для тіней' },
         { id: 'brow-lash-brushes', name: 'Щіточки для брів і вій' },
@@ -594,16 +594,16 @@ export const subcategoriesData = {
       category: 'Набори косметики',
       categoryId: 'cosmetic-sets',
       items: [
-        { id: 'face-care-set', name: 'Догляд за обличчям (креми, сироватки, маски)' },
-        { id: 'body-care-set', name: 'Догляд за тілом (лосьйони, скраби, олії)' },
-        { id: 'hair-care-set', name: 'Догляд за волоссям (шампуні, маски, сироватки)' },
+        { id: 'face-care-set', name: 'Догляд за обличчям' },
+        { id: 'body-care-set', name: 'Догляд за тілом' },
+        { id: 'hair-care-set', name: 'Догляд за волоссям' },
       ],
     },
     {
       category: 'Набори макіяжу',
       categoryId: 'makeup-sets',
       items: [
-        { id: 'makeup-palette', name: 'Палетки (очі + губи + обличчя)' },
+        { id: 'makeup-palette', name: 'Палетки' },
         { id: 'mini-makeup-set', name: 'Міні-набори декоративної косметики' },
         { id: 'pro-makeup-case', name: 'Професійні кейси для візажистів' },
       ],
@@ -614,7 +614,7 @@ export const subcategoriesData = {
       items: [
         { id: 'women-perfume-set', name: 'Жіночі парфумерні набори' },
         { id: 'men-perfume-set', name: 'Чоловічі парфумерні набори' },
-        { id: 'unisex-perfume-set', name: 'Унісекс аромати в наборах' },
+        { id: 'unisex-perfume-set', name: 'Унісекс аромати' },
         { id: 'travel-perfume-set', name: 'Міні-набори або тревел-версії' },
       ],
     },
@@ -622,8 +622,8 @@ export const subcategoriesData = {
       category: 'Набори для дітей',
       categoryId: 'child-sets',
       items: [
-        { id: 'child-care-set', name: 'Набори догляду (гелі, шампуні, олії)' },
-        { id: 'child-perfume-toy-set', name: 'Дитячі парфумерні води в комплекті з іграшками' },
+        { id: 'child-care-set', name: 'Набори догляду' },
+        { id: 'child-perfume-toy-set', name: 'Дитячі парфумерні води' },
       ],
     },
     {
@@ -631,7 +631,7 @@ export const subcategoriesData = {
       categoryId: 'gift-certificates',
       items: [
         { id: 'electronic-certificate', name: 'Електронні сертифікати' },
-        { id: 'paper-certificate', name: 'Паперові сертифікати з коробкою' },
+        { id: 'paper-certificate', name: 'Паперові сертифікати' },
       ],
     },
     {
@@ -639,7 +639,7 @@ export const subcategoriesData = {
       categoryId: 'seasonal-sets',
       items: [
         { id: 'holiday-sets', name: 'Різдвяні/новорічні колекції' },
-        { id: 'special-occasion-sets', name: '8 Березня, День Святого Валентина, День матері' },
+        { id: 'special-occasion-sets', name: 'Святкові набори' },
       ],
     },
   ],
@@ -683,7 +683,7 @@ function CategorySubcategories() {
                   {subcategory.items.map(item => (
                     <li key={item.id}>
                       <Link
-                        to={`/category/${subcategory.categoryId}${item.type ? `?type=${encodeURIComponent(item.type)}` : ''}`}
+                        to={`/category/${item.id}`}
                         className="subcategory-link"
                       >
                         {item.name}

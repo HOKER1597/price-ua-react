@@ -11,6 +11,27 @@
   text-align: center;
 }
 
+.type-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.type-button {
+  padding: 8px 16px;
+  background-color: #6495ed;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+.type-button:hover {
+  background-color: #30518d;
+}
+
 .product-list-container {
   display: flex;
   gap: 20px;

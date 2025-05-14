@@ -99,8 +99,9 @@ body {
   box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1), 4px 0 8px rgba(0, 0, 0, 0.1), 0 8px 12px rgba(0, 0, 0, 0.15);
   border-radius: 6px;
   z-index: 1000;
-  width: 800px;
-  padding: 20px;
+  width: 1000px; /* Increased width to accommodate 4 columns */
+  min-height: 530px;
+  padding: 10px; /* Further reduced padding */
   opacity: 0;
   transform: translateX(-10px);
   visibility: hidden;
@@ -148,9 +149,11 @@ body {
   gap: 40px;
 }
 
+/* Зменшення відступу між блоками підкатегорій у спливаючому меню */
 .subcategory-group {
   flex: 1;
   min-width: 200px;
+  margin-bottom: 0px !important; /* Змінено з 20px на 5px з !important для перевизначення конфліктів */
 }
 
 .subcategory-title {
@@ -196,6 +199,44 @@ body {
 .all-categories {
   font-size: 20px;
   font-weight: 600;
+}
+
+.show-more-btn {
+  background: none;
+  border: none;
+  color: #0288d1;
+  font-size: 12px; /* Reduced font size to match subcategory items */
+  cursor: pointer;
+  padding: 4px 0; /* Reduced padding */
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Reduced gap */
+  margin-top: 6px; /* Reduced margin */
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.show-more-btn:hover {
+  color: #01579b;
+  transform: translateY(-2px);
+}
+
+.subcategory-show-more-btn {
+  background: none;
+  border: none;
+  color: #0288d1;
+  font-size: 12px; /* Match subcategory-link font size */
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.subcategory-show-more-btn:hover {
+  color: #01579b;
+  transform: translateY(-2px);
 }
 
 /* Hero Carousel */

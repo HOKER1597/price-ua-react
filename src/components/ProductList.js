@@ -20,7 +20,6 @@ function ProductList({ searchTerm }) {
   // Log initialization for debugging
   console.log('ProductList initialized with:', {
     categoryId,
-    searchTerm,
     searchQuery,
     initialType,
     isSearchPage,
@@ -96,6 +95,12 @@ function ProductList({ searchTerm }) {
     types: false,
     categories: false,
   });
+
+  // State for type buttons visibility
+  const [showTypeButtons, setShowTypeButtons] = useState(true);
+
+  // State for top 5 types
+  const [topTypes, setTopTypes] = useState([]);
 
   // State for loading indicator
   const [isLoading, setIsLoading] = useState(true);
@@ -391,6 +396,7 @@ function ProductList({ searchTerm }) {
         const allTypes = [...new Set(productsData.map(p => p.feature_type).filter(Boolean))].sort(
           (a, b) => (typeCounts[b] || 0) - (typeCounts[a] || 0)
         );
+        const topFiveTypes = allTypes.slice(0, 5); // Get top 5 types
         const allCategories = isSearchPage
           ? [...new Set(productsData.map(p => p.category_name))].sort(
               (a, b) => (categoryCounts[b] || 0) - (categoryCounts[a] || 0)
@@ -404,6 +410,7 @@ function ProductList({ searchTerm }) {
           types: allTypes,
           categories: allCategories,
         });
+        setTopTypes(topFiveTypes); // Set top 5 types
 
         setAllProducts(productsData);
         setFilteredProducts(productsData);
@@ -550,6 +557,24 @@ function ProductList({ searchTerm }) {
     setActiveFilter({ type: filterType, value });
   };
 
+  // Handle type button click
+  const handleTypeButtonClick = (type) => {
+    setSelectedFilters((prev) => ({
+      ...prev,
+      types: [type],
+    }));
+    setAppliedFilters((prev) => ({
+      ...prev,
+      types: [type],
+    }));
+    setShowTypeButtons(false);
+    setCurrentPage(1);
+    setStartPage(1);
+    setLoadMorePages(1);
+    setIsPaginated(true);
+    setActiveFilter(null);
+  };
+
   // Remove a filter
   const removeFilter = (filterType, value) => {
     setSelectedFilters((prev) => {
@@ -585,6 +610,7 @@ function ProductList({ searchTerm }) {
     setStartPage(1);
     setLoadMorePages(1);
     setIsPaginated(true);
+    setShowTypeButtons(true); // Show type buttons again on reset
   };
 
   // Apply filters
@@ -719,7 +745,20 @@ function ProductList({ searchTerm }) {
 
   return (
     <div className="product-list">
-      <h2>Товари категорії</h2>
+      <h2>{categoryId && !isSearchPage ? categoryNames[categoryId] || 'Товари категорії' : 'Усі товари'}</h2>
+      {showTypeButtons && topTypes.length > 0 && (
+        <div className="type-buttons">
+          {topTypes.map((type, index) => (
+            <button
+              key={index}
+              className="type-button"
+              onClick={() => handleTypeButtonClick(type)}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+      )}
       {isLoading && (
         <div className="loading-overlay">
           <div className="spinner-container">
@@ -960,11 +999,9 @@ function ProductList({ searchTerm }) {
               onClick={applyFilters}
               style={{
                 top: filterRefs.current[`${activeFilter.type}-${activeFilter.value}`]
-                  ? `${
-                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].getBoundingClientRect().top -
+                  ? `${filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].getBoundingClientRect().top -
                       filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].closest('.filters').getBoundingClientRect().top +
-                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].offsetHeight / 2
-                    }px`
+                      filterRefs.current[`${activeFilter.type}-${activeFilter.value}`].offsetHeight / 2}px`
                   : '0px',
               }}
             >
