@@ -73,7 +73,7 @@ export const subcategoriesData = {
       category: 'Тонізація',
       categoryId: 'toning',
       items: [
-        { id: 'toner', name: 'Тоніки' },
+        { id: 'tonic', name: 'Тоніки' },
         { id: 'essence', name: 'Есенції' },
         { id: 'hydrolate', name: 'Гідролати' },
         { id: 'mist', name: 'Місти' },
@@ -222,7 +222,7 @@ export const subcategoriesData = {
       categoryId: 'hair-coloring',
       items: [
         { id: 'hair-dye', name: 'Фарби' },
-        { id: 'toner', name: 'Тоніки' },
+        { id: 'tonic', name: 'Тоніки' },
         { id: 'lightener', name: 'Освітлювачі' },
         { id: 'post-color-care', name: 'Засоби після фарбування' },
       ],
