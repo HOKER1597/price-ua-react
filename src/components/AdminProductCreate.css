@@ -1,0 +1,102 @@
+.admin-product-create {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.admin-product-create h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.feature-group,
+.store-price-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.feature-group select,
+.feature-group input,
+.store-price-group select,
+.store-price-group input {
+  flex: 1;
+}
+
+.add-button {
+  display: block;
+  margin: 10px 0;
+  padding: 8px 16px;
+  background-color: #0288d1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.add-button:hover {
+  background-color: #0277bd;
+}
+
+.save-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+.save-button:hover {
+  background-color: #e55a50;
+}
+
+.save-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff6f61;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.success-message {
+  color: #4caf50;
+  font-size: 14px;
+  margin-bottom: 15px;
+}

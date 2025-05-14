@@ -65,6 +65,16 @@ function Header({ setSearchTerm }) {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem('user');
+      if (updatedUser) {
+        setUser(JSON.parse(updatedUser));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   useEffect(() => {
@@ -310,22 +320,26 @@ function Header({ setSearchTerm }) {
           )}
         </div>
         <div className="profile">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
           {user ? (
             <div className="user-profile">
+              {user.photo ? (
+                <img src={user.photo} alt="User Avatar" className="header-avatar-img" />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              )}
               <span onClick={toggleContextMenu} className="nickname" style={{ cursor: 'pointer' }}>
                 {user.nickname}
               </span>
@@ -340,13 +354,26 @@ function Header({ setSearchTerm }) {
                   >
                     Аккаунт
                   </div>
-                  <div className="context-menu-item" 
-                  onClick={() => {
+                  <div
+                    className="context-menu-item"
+                    onClick={() => {
                       navigate('/wishlist');
                       setShowContextMenu(false);
-                    }}>
+                    }}
+                  >
                     Бажане
                   </div>
+                  {user.is_admin && (
+                    <div
+                      className="context-menu-item"
+                      onClick={() => {
+                        navigate('/admin/product-create');
+                        setShowContextMenu(false);
+                      }}
+                    >
+                      Адмін: Створити товар
+                    </div>
+                  )}
                   <div className="context-menu-item" onClick={handleLogout}>
                     Вийти
                   </div>
@@ -354,9 +381,25 @@ function Header({ setSearchTerm }) {
               )}
             </div>
           ) : (
-            <Link to="/login" className="login-link">
-              Увійти
-            </Link>
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <Link to="/login" className="login-link">
+                Увійти
+              </Link>
+            </>
           )}
         </div>
       </div>

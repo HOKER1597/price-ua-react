@@ -35,6 +35,20 @@
 
 .account-avatar {
   flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+}
+
+.account-avatar-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.account-avatar-svg {
+  cursor: pointer;
 }
 
 .account-nickname {
@@ -100,6 +114,15 @@
 
 .account-button:hover {
   background-color: #0277bd;
+}
+
+.account-button-add-photo {
+  background-color: #4caf50;
+  margin-bottom: 15px;
+}
+
+.account-button-add-photo:hover {
+  background-color: #45a049;
 }
 
 .error {

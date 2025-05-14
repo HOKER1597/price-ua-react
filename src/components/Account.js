@@ -15,6 +15,7 @@ function Account() {
     email: false,
     gender: false,
     birthDate: false,
+    avatar: false,
   });
   const navigate = useNavigate();
 
@@ -28,7 +29,7 @@ function Account() {
       setBirthDate(parsedUser.birth_date ? parsedUser.birth_date.split('T')[0] : '');
       // Start animations
       setAnimate(true);
-      setTimeout(() => setFieldAnimations({ email: true, gender: true, birthDate: true }), 100);
+      setTimeout(() => setFieldAnimations({ email: true, gender: true, birthDate: true, avatar: true }), 100);
     } else {
       navigate('/login');
     }
@@ -49,11 +50,51 @@ function Account() {
         }
       );
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Dispatch storage event to notify Header
+      window.dispatchEvent(new Event('storage'));
       setUser(response.data.user);
       setSuccess('Дані успішно оновлено');
       setError('');
     } catch (err) {
       setError(err.response?.data?.error || 'Помилка сервера');
+      setSuccess('');
+    }
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setError('Файл не обрано');
+      setSuccess('');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await axios.post(
+        'https://price-ua-react-backend.onrender.com/upload-avatar',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Dispatch storage event to notify Header
+      window.dispatchEvent(new Event('storage'));
+      setUser(response.data.user);
+      setSuccess('Аватарку успішно завантажено');
+      setError('');
+      // Reset input
+      e.target.value = null;
+    } catch (err) {
+      setError(err.response?.data?.error || 'Помилка завантаження аватарки');
       setSuccess('');
     }
   };
@@ -65,26 +106,50 @@ function Account() {
       <div className={`account-container ${animate ? 'animate' : ''}`}>
         <div className="account-header">
           <div className="account-avatar">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="100"
-              height="100"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#555"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            {user.photo ? (
+              <img
+                src={user.photo}
+                alt="User Avatar"
+                className="account-avatar-img"
+                onClick={() => document.getElementById('avatar-upload').click()}
+              />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="100"
+                height="100"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#555"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                onClick={() => document.getElementById('avatar-upload').click()}
+                className="account-avatar-svg"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            )}
+            <input
+              id="avatar-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              style={{ display: 'none' }}
+            />
           </div>
           <h2 className="account-nickname">{user.nickname}</h2>
         </div>
         <div className="account-details">
           {error && <p className="error">{error}</p>}
           {success && <p className="success">{success}</p>}
+          <button
+            onClick={() => document.getElementById('avatar-upload').click()}
+            className="account-button account-button-add-photo"
+          >
+            Додати фотографію
+          </button>
           <label className="account-label">Пошта</label>
           <input
             type="email"
