@@ -1,12 +1,21 @@
 .admin-product-create {
-  max-width: 800px;
+  max-width: 900px;
   margin: 20px auto;
   padding: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInPage 0.5s ease forwards;
 }
 
 .admin-product-create h2 {
   font-size: 24px;
   margin-bottom: 20px;
+  color: #333;
+}
+
+.admin-product-create h3 {
+  font-size: 18px;
+  margin: 20px 0 10px;
   color: #333;
 }
 
@@ -38,22 +47,78 @@
 }
 
 .feature-group,
-.store-price-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.store-price-group,
+.image-group {
+  width: 100%;
 }
 
-.feature-group select,
-.feature-group input,
-.store-price-group select,
-.store-price-group input {
+.image-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.image-group .input-with-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.image-preview {
+  margin-top: 10px;
+}
+
+.image-preview label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.feature-group .input-with-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.store-price-group .input-with-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.store-price-group select {
+  flex: 0 0 200px; /* Фіксована ширина для вибору магазину */
+}
+
+.store-price-group input[type="number"] {
+  flex: 0 0 100px; /* Фіксована ширина для поля ціни */
+}
+
+.store-price-group input[type="text"] {
+  flex: 1; /* Поле для посилання займає решту простору */
+}
+
+.feature-group select {
+  flex: 0 0 30%;
+}
+
+.feature-group input {
   flex: 1;
 }
 
 .add-button {
-  display: block;
-  margin: 10px 0;
   padding: 8px 16px;
   background-color: #0288d1;
   color: white;
@@ -61,6 +126,12 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
+  min-width: 40px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .add-button:hover {
@@ -99,4 +170,32 @@
   color: #4caf50;
   font-size: 14px;
   margin-bottom: 15px;
+}
+
+.animate-field {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInField 0.3s ease forwards;
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInField {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

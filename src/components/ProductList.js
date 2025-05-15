@@ -8,7 +8,7 @@ function ProductList({ searchTerm }) {
   const { categoryId } = useParams();
   const location = useLocation();
 
-  // Memoize queryParams and derived values to prevent unnecessary re-computation
+  // Memoize queryParams and derived values
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const searchQuery = useMemo(
     () => queryParams.get('query') || queryParams.get('search') || searchTerm || '',
@@ -17,18 +17,10 @@ function ProductList({ searchTerm }) {
   const initialType = useMemo(() => queryParams.get('type') || '', [queryParams]);
   const isSearchPage = useMemo(() => location.pathname === '/search', [location.pathname]);
 
-  // Log initialization for debugging
-  console.log('ProductList initialized with:', {
-    categoryId,
-    searchQuery,
-    initialType,
-    isSearchPage,
-    location: location.pathname + location.search,
-  });
-
-  // State for user and token to avoid localStorage re-parsing
+  // State for user, token, and admin check
   const [user] = useState(() => JSON.parse(localStorage.getItem('user')) || null);
   const [token] = useState(() => localStorage.getItem('token') || null);
+  const isAdmin = user && user.is_admin;
 
   // State for filters
   const [filters, setFilters] = useState({
@@ -111,6 +103,10 @@ function ProductList({ searchTerm }) {
   // State for login prompt
   const [showLoginPrompt, setShowLoginPrompt] = useState({});
 
+  // State for delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+
   // Refs for filter positioning
   const filterRefs = useRef({});
   const tagRef = useRef(null);
@@ -122,7 +118,7 @@ function ProductList({ searchTerm }) {
     return Math.min(...storePrices.map(sp => sp.price));
   };
 
-  // Handle heart click with optimistic update
+  // Handle heart click
   const handleHeartClick = async (productId, event) => {
     event.preventDefault();
     if (!user || !token) {
@@ -171,7 +167,58 @@ function ProductList({ searchTerm }) {
     }
   };
 
-  // Calculate filtered products for preview and disabled filters
+  // Handle trash can click
+  const handleTrashClick = (productId, event) => {
+    event.preventDefault();
+    setProductToDelete(productId);
+    setShowDeleteModal(true);
+  };
+
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    if (!productToDelete || !token) return;
+
+    // Optimistic UI update
+    setAllProducts(prev => prev.filter(product => product.id !== productToDelete));
+    setFilteredProducts(prev => prev.filter(product => product.id !== productToDelete));
+    setTotalProducts(prev => prev - 1);
+    setPreviewProductCount(prev => prev - 1);
+
+    try {
+      await axios.delete(`https://price-ua-react-backend.onrender.com/admin/product/${productToDelete}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      console.error('Помилка видалення товару:', error);
+      alert('Не вдалося видалити товар. Спробуйте ще раз.');
+      // Revert optimistic update on failure
+      const fetchProducts = async () => {
+        try {
+          const response = await axios.get('https://price-ua-react-backend.onrender.com/products', {
+            params: { category: categoryId, search: searchQuery, limit: 1000 },
+          });
+          setAllProducts(response.data.products);
+          setFilteredProducts(response.data.products);
+          setTotalProducts(response.data.products.length);
+          setPreviewProductCount(response.data.products.length);
+        } catch (err) {
+          console.error('Помилка відновлення продуктів:', err);
+        }
+      };
+      fetchProducts();
+    } finally {
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    }
+  };
+
+  // Handle delete cancel
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+  };
+
+  // Calculate filtered products
   const calculateFilteredProducts = useCallback((tempFilters) => {
     let filtered = [...allProducts];
 
@@ -254,32 +301,32 @@ function ProductList({ searchTerm }) {
     };
 
     filters.brands.forEach(brand => {
-      const tempFilters = { ...baseFilters, brands: [brand], priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: baseFilters.types, categories: baseFilters.categories };
+      const tempFilters = { ...baseFilters, brands: [brand] };
       const filtered = calculateFilteredProducts(tempFilters);
       if (filtered.length === 0) newDisabledFilters.brands.add(brand);
     });
 
     filters.priceRanges.forEach(range => {
-      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: [range.label], volumes: baseFilters.volumes, types: baseFilters.types, categories: baseFilters.categories };
+      const tempFilters = { ...baseFilters, priceRanges: [range.label] };
       const filtered = calculateFilteredProducts(tempFilters);
       if (filtered.length === 0) newDisabledFilters.priceRanges.add(range.label);
     });
 
     filters.volumes.forEach(volume => {
-      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: [volume], types: baseFilters.types, categories: baseFilters.categories };
+      const tempFilters = { ...baseFilters, volumes: [volume] };
       const filtered = calculateFilteredProducts(tempFilters);
       if (filtered.length === 0) newDisabledFilters.volumes.add(volume);
     });
 
     filters.types.forEach(type => {
-      const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: [type], categories: baseFilters.categories };
+      const tempFilters = { ...baseFilters, types: [type] };
       const filtered = calculateFilteredProducts(tempFilters);
       if (filtered.length === 0) newDisabledFilters.types.add(type);
     });
 
     if (isSearchPage) {
       filters.categories.forEach(category => {
-        const tempFilters = { ...baseFilters, brands: baseFilters.brands, priceRanges: baseFilters.priceRanges, volumes: baseFilters.volumes, types: baseFilters.types, categories: [category] };
+        const tempFilters = { ...baseFilters, categories: [category] };
         const filtered = calculateFilteredProducts(tempFilters);
         if (filtered.length === 0) newDisabledFilters.categories.add(category);
       });
@@ -290,15 +337,6 @@ function ProductList({ searchTerm }) {
 
   // Fetch products and saved statuses
   useEffect(() => {
-    console.log('useEffect triggered with dependencies:', {
-      categoryId,
-      searchQuery,
-      initialType,
-      isSearchPage,
-      user: user ? user.id : null,
-      token: token ? 'present' : 'absent',
-    });
-
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
@@ -307,20 +345,8 @@ function ProductList({ searchTerm }) {
           category: categoryId && !isSearchPage ? categoryId : undefined,
           limit: 1000,
         };
-        console.log('Fetching products with params:', requestParams);
-
         const productsResponse = await axios.get('https://price-ua-react-backend.onrender.com/products', {
           params: requestParams,
-        });
-
-        console.log('Products API response:', {
-          productCount: productsResponse.data.products.length,
-          products: productsResponse.data.products.map(p => ({
-            id: p.id,
-            name: p.name,
-            category_id: p.category_id,
-            category_name: p.category_name,
-          })),
         });
 
         let productsData = productsResponse.data.products || [];
@@ -334,7 +360,6 @@ function ProductList({ searchTerm }) {
               { headers: { Authorization: `Bearer ${token}` } }
             );
             savedProductIds = savedResponse.data.savedProductIds || [];
-            console.log('Saved products response:', { savedProductIds });
           } catch (error) {
             console.error('Помилка завантаження статусів збереження:', error);
           }
@@ -396,7 +421,7 @@ function ProductList({ searchTerm }) {
         const allTypes = [...new Set(productsData.map(p => p.feature_type).filter(Boolean))].sort(
           (a, b) => (typeCounts[b] || 0) - (typeCounts[a] || 0)
         );
-        const topFiveTypes = allTypes.slice(0, 5); // Get top 5 types
+        const topFiveTypes = allTypes.slice(0, 5);
         const allCategories = isSearchPage
           ? [...new Set(productsData.map(p => p.category_name))].sort(
               (a, b) => (categoryCounts[b] || 0) - (categoryCounts[a] || 0)
@@ -410,7 +435,7 @@ function ProductList({ searchTerm }) {
           types: allTypes,
           categories: allCategories,
         });
-        setTopTypes(topFiveTypes); // Set top 5 types
+        setTopTypes(topFiveTypes);
 
         setAllProducts(productsData);
         setFilteredProducts(productsData);
@@ -481,16 +506,6 @@ function ProductList({ searchTerm }) {
   // Client-side filtering
   useEffect(() => {
     if (!isLoading && allProducts.length > 0) {
-      console.log('Starting client-side filtering:', {
-        allProductsCount: allProducts.length,
-        searchQuery,
-        categoryId,
-        isSearchPage,
-        appliedFilters,
-        customPriceFrom,
-        customPriceTo,
-      });
-
       let filtered = [...allProducts];
 
       if (searchQuery) {
@@ -610,7 +625,7 @@ function ProductList({ searchTerm }) {
     setStartPage(1);
     setLoadMorePages(1);
     setIsPaginated(true);
-    setShowTypeButtons(true); // Show type buttons again on reset
+    setShowTypeButtons(true);
   };
 
   // Apply filters
@@ -767,6 +782,17 @@ function ProductList({ searchTerm }) {
           </div>
         </div>
       )}
+      {showDeleteModal && (
+        <div className="delete-modal-overlay">
+          <div className="delete-modal">
+            <p>Ви точно хочете видалити цей ({productToDelete}) товар?</p>
+            <div className="delete-modal-buttons">
+              <button className="delete-confirm-btn" onClick={handleDeleteConfirm}>Так</button>
+              <button className="delete-cancel-btn" onClick={handleDeleteCancel}>Ні</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="product-list-container">
         <div className={`filters ${!isLoading ? 'loaded' : ''}`}>
           <div className="filters-header">
@@ -885,7 +911,7 @@ function ProductList({ searchTerm }) {
             {filters.brands.length > 12 && (
               <button className="show-more-btn" onClick={() => toggleShowMore('brands')}>
                 {showMore.brands ? 'Менше ↑' : 'Більше ↓'}
-              </button>
+                </button>
             )}
           </div>
 
@@ -1026,32 +1052,58 @@ function ProductList({ searchTerm }) {
                   <div key={`${product.id}-${index}`} className="product-card-container">
                     <Link to={`/product/${product.id}`} className="product-card">
                       <h3>{getProductName(product)}</h3>
-                      <img
-                        src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.webp'}
-                        alt={product.name}
-                        onError={(e) => (e.target.src = '/img/placeholder.webp')}
-                      />
+                      <div className="image-container">
+                        <img
+                          src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.webp'}
+                          alt={product.name}
+                          onError={(e) => (e.target.src = '/img/placeholder.webp')}
+                        />
+                        <div
+                          className={`heart-icon ${savedProducts.has(product.id) ? 'saved' : ''}`}
+                          onClick={(e) => handleHeartClick(product.id, e)}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill={savedProducts.has(product.id) ? '#d32f2f' : 'none'}
+                            stroke="#d32f2f"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
+                          </svg>
+                        </div>
+                      </div>
                       <p className="price">{getMinPrice(product.store_prices)} грн</p>
                       <p>{product.description || 'Опис відсутній'}</p>
                     </Link>
-                    <div
-                      className={`heart-icon ${savedProducts.has(product.id) ? 'saved' : ''}`}
-                      onClick={(e) => handleHeartClick(product.id, e)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill={savedProducts.has(product.id) ? '#d32f2f' : 'none'}
-                        stroke="#d32f2f"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    {isAdmin && (
+                      <div
+                        className="trash-icon"
+                        onClick={(e) => handleTrashClick(product.id, e)}
+                        title="Видалити товар"
                       >
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"></path>
-                      </svg>
-                    </div>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#d32f2f"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </div>
+                    )}
                     {showLoginPrompt[product.id] && (
                       <div className="login-prompt">
                         Увійдіть в <Link to="/login" className="login-link">аккаунт</Link> щоб додати до бажаного

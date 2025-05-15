@@ -12,8 +12,6 @@ function AdminProductCreate() {
     name: '',
     volume: '',
     images: [null],
-    rating: '',
-    views: '',
     code: '',
     features: [{ key: '', value: '' }],
     description: '',
@@ -22,6 +20,7 @@ function AdminProductCreate() {
     usage: '',
     store_prices: [{ store_id: '', price: '', link: '' }],
   });
+  const [previewImage, setPreviewImage] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,6 +64,7 @@ function AdminProductCreate() {
       const newImages = [...formData.images];
       newImages[index] = e.target.files[0];
       setFormData({ ...formData, images: newImages });
+      setPreviewImage(e.target.files[0]);
     } else if (type === 'feature') {
       const newFeatures = [...formData.features];
       newFeatures[index][field] = value;
@@ -105,15 +105,21 @@ function AdminProductCreate() {
     setError(null);
     setSuccess(null);
 
+    // Validate required fields
+    if (!formData.category_id || !formData.brand_id || !formData.name) {
+      setError('Заповніть обов’язкові поля: категорія, бренд, назва');
+      setIsLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem('token');
     const formDataToSend = new FormData();
 
+    // Append form data
     formDataToSend.append('category_id', formData.category_id);
     formDataToSend.append('brand_id', formData.brand_id);
     formDataToSend.append('name', formData.name);
     formDataToSend.append('volume', formData.volume);
-    formDataToSend.append('rating', formData.rating);
-    formDataToSend.append('views', formData.views);
     formDataToSend.append('code', formData.code);
     formDataToSend.append('description', formData.description);
     formDataToSend.append('description_full', formData.description_full);
@@ -128,13 +134,10 @@ function AdminProductCreate() {
     }, {});
     formDataToSend.append('features', JSON.stringify(featureMap));
 
-    formData.store_prices.forEach((store, index) => {
-      if (store.store_id && store.price) {
-        formDataToSend.append(`store_prices[${index}][store_id]`, store.store_id);
-        formDataToSend.append(`store_prices[${index}][price]`, store.price);
-        formDataToSend.append(`store_prices[${index}][link]`, store.link);
-      }
-    });
+    const validStorePrices = formData.store_prices.filter(
+      (store) => store.store_id && store.price && !isNaN(parseFloat(store.price))
+    );
+    formDataToSend.append('store_prices', JSON.stringify(validStorePrices));
 
     formData.images.forEach((image) => {
       if (image) {
@@ -156,8 +159,6 @@ function AdminProductCreate() {
         name: '',
         volume: '',
         images: [null],
-        rating: '',
-        views: '',
         code: '',
         features: [{ key: '', value: '' }],
         description: '',
@@ -166,25 +167,54 @@ function AdminProductCreate() {
         usage: '',
         store_prices: [{ store_id: '', price: '', link: '' }],
       });
+      setPreviewImage(null);
     } catch (err) {
-      console.error('Помилка створення товару:', err);
-      setError('Не вдалося створити товар. Перевірте дані або підключення до сервера.');
+      console.error('Помилка створення товару:', {
+        message: err.message,
+        response: err.response ? err.response.data : 'No response data',
+      });
+      setError(err.response?.data?.error || 'Не вдалося створити товар. Перевірте дані або підключення до сервера.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const featureOptions = [
-    'brand', 'country', 'type', 'class', 'category', 'purpose', 'gender', 'active_ingredients',
+    { key: 'brand', label: 'Бренд' },
+    { key: 'country', label: 'Країна' },
+    { key: 'type', label: 'Тип' },
+    { key: 'class', label: 'Клас' },
+    { key: 'category', label: 'Категорія' },
+    { key: 'purpose', label: 'Призначення' },
+    { key: 'gender', label: 'Стать' },
+    { key: 'active_ingredients', label: 'Активні інгредієнти' },
   ];
 
+  // Filter available feature options based on selected features
+  const getAvailableFeatureOptions = (currentIndex) => {
+    const selectedKeys = formData.features
+      .filter((_, index) => index !== currentIndex)
+      .map(f => f.key)
+      .filter(key => key);
+    return featureOptions.filter(option => !selectedKeys.includes(option.key));
+  };
+
+  // Filter available store options based on selected stores
+  const getAvailableStoreOptions = (currentIndex) => {
+    const selectedStoreIds = formData.store_prices
+      .filter((_, index) => index !== currentIndex)
+      .map(s => s.store_id)
+      .filter(id => id);
+    return stores.filter(store => !selectedStoreIds.includes(store.id.toString()));
+  };
+
   return (
-    <div className="admin-product-create">
+    <div className="admin-product-create animate-page">
       <h2>Створити новий товар</h2>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       <form onSubmit={handleSubmit}>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Категорія</label>
           <select
             name="category_id"
@@ -200,7 +230,7 @@ function AdminProductCreate() {
             ))}
           </select>
         </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Бренд</label>
           <select
             name="brand_id"
@@ -216,7 +246,7 @@ function AdminProductCreate() {
             ))}
           </select>
         </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Назва</label>
           <input
             type="text"
@@ -227,21 +257,29 @@ function AdminProductCreate() {
           />
         </div>
         {formData.images.map((image, index) => (
-          <div key={index} className="form-group">
+          <div key={index} className="form-group animate-field image-group">
             <label>Зображення {index + 1}</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleInputChange(e, index, 'image', 'image')}
-            />
+            <div className="input-with-button">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleInputChange(e, index, 'image', 'image')}
+              />
+              {formData.images.length < 10 && index === formData.images.length - 1 && (
+                <button type="button" className="add-button" onClick={addImageField}>
+                  +
+                </button>
+              )}
+            </div>
           </div>
         ))}
-        {formData.images.length < 10 && (
-          <button type="button" className="add-button" onClick={addImageField}>
-            +
-          </button>
+        {previewImage && (
+          <div className="form-group animate-field image-preview">
+            <label>Вигляд зображення</label>
+            <img src={URL.createObjectURL(previewImage)} alt="Preview" />
+          </div>
         )}
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Об’єм</label>
           <input
             type="text"
@@ -250,29 +288,7 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
-        <div className="form-group">
-          <label>Рейтинг</label>
-          <input
-            type="number"
-            name="rating"
-            value={formData.rating}
-            onChange={(e) => handleInputChange(e)}
-            min="0"
-            max="5"
-            step="0.1"
-          />
-        </div>
-        <div className="form-group">
-          <label>Перегляди</label>
-          <input
-            type="number"
-            name="views"
-            value={formData.views}
-            onChange={(e) => handleInputChange(e)}
-            min="0"
-          />
-        </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Код</label>
           <input
             type="text"
@@ -281,33 +297,36 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
+        <h3>Характеристики</h3>
         {formData.features.map((feature, index) => (
-          <div key={index} className="form-group feature-group">
-            <select
-              value={feature.key}
-              onChange={(e) => handleInputChange(e, index, 'key', 'feature')}
-            >
-              <option value="">Виберіть характеристику</option>
-              {featureOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={feature.value}
-              onChange={(e) => handleInputChange(e, index, 'value', 'feature')}
-              placeholder="Значення"
-            />
+          <div key={index} className="form-group feature-group animate-field">
+            <div className="input-with-button">
+              <select
+                value={feature.key}
+                onChange={(e) => handleInputChange(e, index, 'key', 'feature')}
+              >
+                <option value="">Виберіть характеристику</option>
+                {getAvailableFeatureOptions(index).map((option) => (
+                  <option key={option.key} value={option.key}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={feature.value}
+                onChange={(e) => handleInputChange(e, index, 'value', 'feature')}
+                placeholder="Значення"
+              />
+              {formData.features.length < 10 && index === formData.features.length - 1 && (
+                <button type="button" className="add-button" onClick={addFeatureField}>
+                  +
+                </button>
+              )}
+            </div>
           </div>
         ))}
-        {formData.features.length < 10 && (
-          <button type="button" className="add-button" onClick={addFeatureField}>
-            +
-          </button>
-        )}
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Короткий опис</label>
           <textarea
             name="description"
@@ -315,7 +334,7 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Повний опис</label>
           <textarea
             name="description_full"
@@ -323,7 +342,7 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Склад</label>
           <textarea
             name="composition"
@@ -331,7 +350,7 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
-        <div className="form-group">
+        <div className="form-group animate-field">
           <label>Використання</label>
           <textarea
             name="usage"
@@ -339,41 +358,44 @@ function AdminProductCreate() {
             onChange={(e) => handleInputChange(e)}
           />
         </div>
+        <h3>Ціни в магазинах</h3>
         {formData.store_prices.map((store, index) => (
-          <div key={index} className="form-group store-price-group">
-            <select
-              value={store.store_id}
-              onChange={(e) => handleInputChange(e, index, 'store_id', 'store_price')}
-            >
-              <option value="">Виберіть магазин</option>
-              {stores.map((store) => (
-                <option key={store.id} value={store.id}>
-                  {store.name}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              value={store.price}
-              onChange={(e) => handleInputChange(e, index, 'price', 'store_price')}
-              placeholder="Ціна"
-              min="0"
-              step="0.01"
-            />
-            <input
-              type="text"
-              value={store.link}
-              onChange={(e) => handleInputChange(e, index, 'link', 'store_price')}
-              placeholder="Посилання"
-            />
+          <div key={index} className="form-group store-price-group animate-field">
+            <div className="input-with-button">
+              <select
+                value={store.store_id}
+                onChange={(e) => handleInputChange(e, index, 'store_id', 'store_price')}
+              >
+                <option value="">Виберіть магазин</option>
+                {getAvailableStoreOptions(index).map((store) => (
+                  <option key={store.id} value={store.id}>
+                    {store.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={store.price}
+                onChange={(e) => handleInputChange(e, index, 'price', 'store_price')}
+                placeholder="Ціна"
+                min="0"
+                step="0.01"
+              />
+              <input
+                type="text"
+                value={store.link}
+                onChange={(e) => handleInputChange(e, index, 'link', 'store_price')}
+                placeholder="Посилання"
+              />
+              {formData.store_prices.length < 10 && index === formData.store_prices.length - 1 && (
+                <button type="button" className="add-button" onClick={addStorePriceField}>
+                  +
+                </button>
+              )}
+            </div>
           </div>
         ))}
-        {formData.store_prices.length < 10 && (
-          <button type="button" className="add-button" onClick={addStorePriceField}>
-            +
-          </button>
-        )}
-        <button type="submit" className="save-button" disabled={isLoading}>
+        <button type="submit" className="save-button animate-field" disabled={isLoading}>
           {isLoading ? 'Збереження...' : 'Зберегти'}
         </button>
       </form>

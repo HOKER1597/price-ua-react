@@ -35,28 +35,32 @@
 .product-list-container {
   display: flex;
   gap: 20px;
-  align-items: flex-start; /* Prevent stretching due to filters */
+  align-items: flex-start;
 }
 
 .products {
-  order: 2; /* Продукти справа */
+  order: 2;
   z-index: 1;
 }
 
 .products-list {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 товари в ряд */
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  order: 2; /* Продукти справа */
-  position: relative; /* Для коректного накладання плашки */
-  min-height: 400px; /* Ensure minimum height for products area */
-  opacity: 0; /* Початкова прозорість для анімації */
-  transition: opacity 0.3s ease-out; /* Анімація появи */
+  order: 2;
+  position: relative;
+  min-height: 400px;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }
 
 .products-list.loaded {
-  opacity: 1; /* Повна видимість після завантаження */
+  opacity: 1;
+}
+
+.product-card-container {
+  position: relative;
 }
 
 .product-card {
@@ -72,8 +76,8 @@
   transform: translateY(20px);
   display: flex;
   flex-direction: column;
-  min-height: 400px; /* Забезпечує мінімальну висоту картки */
-  max-height: 500px; /* Обмежує максимальну висоту */
+  min-height: 400px;
+  max-height: 500px;
   z-index: 2;
 }
 
@@ -85,22 +89,27 @@
 .product-card h3 {
   font-size: 16px;
   margin: 10px 0;
-  min-height: 40px; /* Для 2 рядків тексту */
+  min-height: 40px;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
-  flex: 0 0 auto; /* Заголовок не розтягується */
+  flex: 0 0 auto;
+  position: relative;
+}
+
+.product-card .image-container {
+  position: relative;
+  flex: 0 0 auto;
 }
 
 .product-card img {
   width: 240px;
-  max-height: 500px; /* Обмежує максимальну висоту зображення, але дозволяє меншу */
-  object-fit: contain; /* Зображення масштабуються без спотворення */
+  max-height: 500px;
+  object-fit: contain;
   border-radius: 4px;
   margin: 0 auto;
-  flex: 0 0 auto; /* Зображення не розтягується */
 }
 
 .product-card .price {
@@ -109,8 +118,8 @@
   padding-top: 10px;
   font-size: 20px;
   text-align: center;
-  flex: 0 0 auto; /* Ціна не розтягується */
-  margin-top: auto; /* Притискає ціну донизу картки */
+  flex: 0 0 auto;
+  margin-top: auto;
 }
 
 .product-card p {
@@ -121,10 +130,9 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  flex: 0 0 auto; /* Опис не розтягується */
+  flex: 0 0 auto;
 }
 
-/* Анімація появи */
 @keyframes fadeInUp {
   to {
     opacity: 1;
@@ -132,24 +140,23 @@
   }
 }
 
-/* Стилі для фільтрів */
 .filters {
   max-width: 350px;
   background-color: #fe7fbf;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  order: 1; /* Фільтри зліва */
-  position: relative; /* Для позиціонування плашки */
-  opacity: 0; /* Початкова прозорість для анімації */
-  transform: translateX(-20px); /* Початкове зміщення вліво */
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Анімація появи */
+  order: 1;
+  position: relative;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
   z-index: 1000;
 }
 
 .filters.loaded {
-  opacity: 1; /* Повна видимість після завантаження */
-  transform: translateX(0); /* Повернення на місце */
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .filters-header {
@@ -175,7 +182,7 @@
 .selected-filter-tag {
   display: inline-flex;
   align-items: center;
-  background-color: #d3d3d3; /* Сірий колір для овалу */
+  background-color: #d3d3d3;
   color: #333;
   padding: 5px 10px;
   border-radius: 15px;
@@ -206,7 +213,7 @@
 .reset-all-filters {
   display: inline-flex;
   align-items: center;
-  background-color: #d3d3d3; /* Сірий колір для овалу */
+  background-color: #d3d3d3;
   color: #333;
   padding: 5px 10px;
   border-radius: 15px;
@@ -230,36 +237,32 @@
   color: #555;
 }
 
-/* Контейнер для анімації розгортання */
 .filter-items-container {
   overflow: hidden;
-  transition: max-height 0.3s ease-in-out; /* Плавна анімація для розгортання та закриття */
+  transition: max-height 0.3s ease-in-out;
 }
 
-/* Дві колонки для елементів фільтра */
 .filter-items {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Дві колонки */
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-/* Одна колонка для розділу "Тип" */
 .filter-items-single-column {
-  grid-template-columns: 1fr; /* Одна колонка */
+  grid-template-columns: 1fr;
 }
 
-/* Довгі назви займають обидві колонки */
 .filter-items label.span-two-columns {
-  grid-column: span 2; /* Займає обидві колонки */
+  grid-column: span 2;
 }
 
 .filter-items label {
   display: block;
   font-size: 16px;
   color: #333;
-  white-space: normal; /* Дозволяємо перенос тексту */
-  word-break: break-word; /* Переносимо довгі слова */
-  position: relative; /* Для коректного позиціонування */
+  white-space: normal;
+  word-break: break-word;
+  position: relative;
 }
 
 .filter-items input[type="checkbox"] {
@@ -268,7 +271,6 @@
   height: 18px;
 }
 
-/* Стилі для неактивних (сірих) фільтрів */
 .filter-items label.disabled {
   color: #999;
   cursor: not-allowed;
@@ -279,14 +281,13 @@
   opacity: 0.5;
 }
 
-/* Стилі для плашки "Показати товари" */
 .filter-tag {
   position: absolute;
-  left: 100%; /* Розташовуємо праворуч від фільтрів. */
-  margin-left: 10px; /* Відступ від фільтрів */
-  transform: translateY(-50%); /* Центруємо по вертикалі відносно чекбокса */
+  left: 100%;
+  margin-left: 10px;
+  transform: translateY(-50%);
   padding: 8px 16px;
-  background-color: #6495ed; /* Помаранчевий колір */
+  background-color: #6495ed;
   color: white;
   border: none;
   border-radius: 15px;
@@ -295,14 +296,13 @@
   white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: background-color 0.2s;
-  z-index: 1001; /* Поверх товарів */
+  z-index: 1001;
 }
 
 .filter-tag:hover {
-  background-color: #294579; /* Темніший відтінок при наведенні */
+  background-color: #294579;
 }
 
-/* Стилі для кнопки "Більше"/"Менше" */
 .show-more-btn {
   background: none;
   border: none;
@@ -314,15 +314,14 @@
   align-items: center;
   gap: 5px;
   margin-top: 5px;
-  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out; /* Анімація для кольору та зсуву */
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .show-more-btn:hover {
   color: #01579b;
-  transform: translateY(-2px); /* Легкий зсув при наведенні */
+  transform: translateY(-2px);
 }
 
-/* Стилі для кнопки "Показати товари" */
 .apply-filters-btn {
   padding: 10px 20px;
   background-color: #6495ed;
@@ -341,13 +340,12 @@
   background-color: #30518d;
 }
 
-/* Стилі для пагінації та кнопки "Завантажити ще" */
 .pagination-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
-  width: 100%; /* Ensure it spans the products container */
+  width: 100%;
 }
 
 .load-more-btn {
@@ -400,7 +398,6 @@
   cursor: not-allowed;
 }
 
-/* Стилі для пошуку брендів */
 .brand-search-input {
   width: 250px;
   padding: 8px;
@@ -412,7 +409,6 @@
   background-color: #fff;
 }
 
-/* Стилі для кастомного діапазону цін */
 .custom-price-inputs {
   display: flex;
   gap: 10px;
@@ -429,20 +425,19 @@
   background-color: #fff;
 }
 
-/* Стилі для затемнення та спінера */
 .loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Напівпрозоре затемнення */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000; /* Поверх усіх елементів */
-  animation: fadeInOverlay 0.3s ease-in forwards; /* Анімація появи */
-  opacity: 0; /* Початкова прозорість */
+  z-index: 1000;
+  animation: fadeInOverlay 0.3s ease-in forwards;
+  opacity: 0;
 }
 
 @keyframes fadeInOverlay {
@@ -452,7 +447,7 @@
 }
 
 .loading-overlay.fade-out {
-  animation: fadeOutOverlay 0.3s ease-out forwards; /* Анімація зникнення */
+  animation: fadeOutOverlay 0.3s ease-out forwards;
 }
 
 @keyframes fadeOutOverlay {
@@ -466,11 +461,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: fadeInSpinner 0.3s ease-in forwards; /* Анімація появи */
+  animation: fadeInSpinner 0.3s ease-in forwards;
 }
 
 .loading-overlay.fade-out .spinner-container {
-  animation: fadeOutSpinner 0.3s ease-out forwards; /* Анімація зникнення */
+  animation: fadeOutSpinner 0.3s ease-out forwards;
 }
 
 @keyframes fadeInSpinner {
@@ -492,67 +487,79 @@
 }
 
 .spinner {
-  border: 6px solid #f3f3f3; /* Світло-сірий фон */
-  border-top: 6px solid #6495ed; /* Синій, як у кнопок */
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #6495ed;
   border-radius: 50%;
-  width: 60px; /* Більший розмір */
+  width: 60px;
   height: 60px;
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
 }
 
 .spinner-container p {
-  font-size: 20px; /* Більший текст */
-  color: #fff; /* Білий для контрасту на темному фоні */
+  font-size: 20px;
+  color: #fff;
   font-weight: 500;
 }
 
-/* Анімація для спінера */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* New styles for wishlist feature */
-.product-card-container {
-  position: relative;
-}
-
 .heart-icon {
   position: absolute;
-  top: 70px;
-  right: 20px;
+  top: 10px;
+  right: 10px;
   cursor: pointer;
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.2s ease, transform 0.2s ease; /* Smooth opacity and scale transition */
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 3;
 }
 
 .product-card-container:hover .heart-icon {
-  opacity: 1; /* Visible on hover */
+  opacity: 1;
 }
 
 .heart-icon:hover {
-  transform: scale(1.1); /* Scale on hover */
+  transform: scale(1.1);
 }
 
 .heart-icon.saved {
-  opacity: 0; /* Start hidden for animation */
-  transform: translateY(20px); /* Match product card's starting position */
-  animation: fadeInUp 0.5s ease-out forwards; /* Animate in with product card */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .heart-icon.saved:hover {
-  transform: scale(1.1); /* Scale on hover for saved hearts */
+  transform: scale(1.1);
 }
 
 .heart-icon.saved svg {
-  fill: #ff0000; /* Red fill for saved state */
+  fill: #ff0000;
+}
+
+.trash-icon {
+  position: absolute;
+  top: 15px;
+  right: 5px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 3;
+}
+
+.product-card-container:hover .trash-icon {
+  opacity: 1;
+}
+
+.trash-icon:hover {
+  transform: scale(1.1);
 }
 
 .login-prompt {
   position: absolute;
-  top: -45px; /* Above the heart icon */
+  top: -45px;
   right: 0;
   background-color: #fff;
   border: 1px solid #ccc;
@@ -568,13 +575,13 @@
 }
 
 .login-prompt .login-link {
-  color: #0288d1; /* Matches your button color */
+  color: #0288d1;
   text-decoration: underline;
   cursor: pointer;
 }
 
 .login-prompt .login-link:hover {
-  color: #01579b; /* Matches your button hover color */
+  color: #01579b;
 }
 
 @keyframes fadeInPrompt {
@@ -585,5 +592,83 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeInOverlay 0.3s ease-in forwards;
+}
+
+.delete-modal {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  animation: fadeInModal 0.3s ease-in forwards;
+}
+
+.delete-modal p {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.delete-confirm-btn {
+  padding: 10px 20px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.delete-confirm-btn:hover {
+  background-color: #b71c1c;
+}
+
+.delete-cancel-btn {
+  padding: 10px 20px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.delete-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
