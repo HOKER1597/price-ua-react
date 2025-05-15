@@ -367,11 +367,11 @@ function Header({ setSearchTerm }) {
                     <div
                       className="context-menu-item"
                       onClick={() => {
-                        navigate('/admin/product-create');
+                        navigate('/admin');
                         setShowContextMenu(false);
                       }}
                     >
-                      Адмін: Створити товар
+                      Адмін
                     </div>
                   )}
                   <div className="context-menu-item" onClick={handleLogout}>

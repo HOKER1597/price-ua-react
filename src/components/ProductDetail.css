@@ -7,6 +7,8 @@
 /* Вкладки */
 .tabs {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 20px;
   margin-bottom: 20px;
   animation: slideInTop 0.6s ease-out forwards;
@@ -41,6 +43,33 @@
 
 .tab-button:active {
   color: #ff6f61;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-icon-product {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  visibility: visible !important; /* Завжди видно для адміністраторів */
+  opacity: 1 !important;
+}
+
+.edit-icon-product:hover {
+  transform: scale(1.1);
+}
+
+.trash-icon-product {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  visibility: visible !important; /* Завжди видно для адміністраторів */
+  opacity: 1 !important;
+}
+
+.trash-icon-product:hover {
+  transform: scale(1.1);
 }
 
 .product-content {
@@ -234,7 +263,7 @@
 .price-container {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 15px;
   margin-bottom: 10px;
 }
 
@@ -257,6 +286,37 @@
 
 .price-view-button:hover {
   background-color: #555;
+}
+
+.product-detail-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  margin-left: 10px;
+  margin-top: 0px;
+  visibility: visible !important; /* Ensure always visible */
+  opacity: 1 !important; /* Prevent hiding */
+}
+
+.product-detail-heart.saved .heart-svg {
+  fill: #ff1500;
+  stroke: none;
+}
+
+.product-detail-heart:not(.saved) .heart-svg {
+  fill: none;
+  stroke: #f81500;
+  stroke-width: 2;
+}
+
+.product-detail-heart:hover .heart-svg {
+  fill: #ff1500;
+  stroke: #ff1500;
 }
 
 .volume {
@@ -620,6 +680,58 @@
   font-size: 18px;
   color: #ff6f61;
   padding: 20px;
+}
+
+/* Модальне вікно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.modal p {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-buttons button:first-child {
+  background: #ff6f61;
+  color: #fff;
+}
+
+.modal-buttons button:last-child {
+  background: #ccc;
+  color: #333;
 }
 
 /* Анімації для зображень */

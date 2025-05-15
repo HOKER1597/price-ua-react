@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  position: relative; /* Ensure buttons can be positioned absolutely within */
+  position: relative;
 }
 
 .category-header h3 {
@@ -106,27 +106,27 @@
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 50%; /* Reduced width to half */
+  width: 50%;
   margin-right: 10px;
 }
 
 .category-buttons {
   position: absolute;
-  right: 20px; /* Fix buttons to the right */
+  right: 20px;
   display: flex;
-  gap: 5px; /* Space between buttons */
+  gap: 5px;
 }
 
 .no-products-text {
   font-size: 16px;
   color: #666;
   margin: 10px 0 20px 0;
-  grid-column: 1 / -1; /* Ensure it spans the grid */
+  grid-column: 1 / -1;
 }
 
 .placeholder-card {
   width: 100%;
-  height: 380px; /* Match product card height */
+  height: 380px;
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -208,13 +208,13 @@
   font-size: 16px;
   color: #333;
   margin-bottom: 10px;
-  width: 80%; /* Reduced label width */
+  width: 80%;
   margin-left: auto;
   margin-right: auto;
 }
 
 .modal input {
-  width: 80%; /* Match label width for consistent padding */
+  width: 80%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -234,12 +234,12 @@
 
 .modal-buttons {
   display: flex;
-  justify-content: center; /* Center buttons */
+  justify-content: center;
   gap: 10px;
 }
 
 .delete-modal .modal-buttons {
-  justify-content: center; /* Center buttons in delete modal */
+  justify-content: center;
 }
 
 .delete-modal p,
@@ -263,21 +263,21 @@
 }
 
 .add-btn {
-  background-color: #28a745; /* Green color for Add button */
+  background-color: #28a745;
   color: white;
 }
 
 .add-btn:hover {
-  background-color: #218838; /* Darker green on hover */
+  background-color: #218838;
 }
 
 .confirm-delete-btn {
-  background-color: #d32f2f; /* Red color for Yes button in delete modal */
+  background-color: #d32f2f;
   color: white;
 }
 
 .confirm-delete-btn:hover {
-  background-color: #a62626; /* Darker red on hover */
+  background-color: #a62626;
 }
 
 .delete-btn {
@@ -296,4 +296,37 @@
 
 .cancel-btn:hover {
   background-color: #c0c0c0;
+}
+
+/* Styles for wishlist heart icon to match ProductList */
+.wishlist-heart {
+  position: absolute;
+  top: 0px; /* Adjusted to position below product name */
+  right: 10px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 3;
+}
+
+.product-card-container:hover .wishlist-heart {
+  opacity: 1;
+}
+
+.wishlist-heart:hover {
+  transform: scale(1.1);
+}
+
+.wishlist-heart.saved {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.wishlist-heart.saved:hover {
+  transform: scale(1.1);
+}
+
+.wishlist-heart.saved svg {
+  fill: #ff0000;
 }

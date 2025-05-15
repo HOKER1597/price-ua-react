@@ -9,6 +9,8 @@ import Login from './components/Login';
 import Account from './components/Account';
 import Wishlist from './components/Wishlist';
 import AdminProductCreate from './components/AdminProductCreate';
+import AdminProductEdit from './components/AdminProductEdit';
+import AdminDashboard from './components/AdminDashboard';
 import { DragDropProvider } from './DragDropSetup';
 import './App.css';
 
@@ -30,7 +32,9 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/account" element={<Account />} />
               <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/admin/" element={<AdminDashboard />} />
               <Route path="/admin/product-create" element={<AdminProductCreate />} />
+              <Route path="/admin/product-edit" element={<AdminProductEdit />} />
             </Routes>
           </div>
         </div>

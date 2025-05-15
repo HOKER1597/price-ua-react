@@ -31,32 +31,37 @@ function ProductCard({ product, savedProductIds, toggleSavedProduct, getProductN
     >
       <Link to={`/product/${product.id}`} className="product-card">
         <h3>{getProductName(product)}</h3>
-        <img
-          src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.webp'}
-          alt={product.name}
-          onError={(e) => (e.target.src = '/img/placeholder.webp')}
-        />
+        <div className="image-container">
+          <img
+            src={product.images && product.images.length > 0 ? product.images[0] : '/img/placeholder.webp'}
+            alt={product.name}
+            onError={(e) => (e.target.src = '/img/placeholder.webp')}
+          />
+          <div
+            className={`wishlist-heart ${savedProductIds.includes(product.id) ? 'saved' : ''}`}
+            onClick={(e) => {
+              e.preventDefault(); // Prevent Link navigation on heart click
+              toggleSavedProduct(product.id);
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill={savedProductIds.includes(product.id) ? '#ff0000' : 'none'}
+              stroke="#ff0000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+        </div>
         <p className="price">{getMinPrice(product.store_prices)}</p>
         <p>{product.description || 'Опис відсутній'}</p>
       </Link>
-      <div
-        className={`heart-icon ${savedProductIds.includes(product.id) ? 'saved' : ''}`}
-        onClick={() => toggleSavedProduct(product.id)}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill={savedProductIds.includes(product.id) ? '#d32f2f' : 'none'}
-          stroke="#d32f2f"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
-      </div>
     </div>
   );
 }
@@ -305,6 +310,17 @@ function Wishlist() {
       }
 
       setIsLoading(true);
+
+      // Clean up nameless categories
+      try {
+        await axios.delete('https://price-ua-react-backend.onrender.com/categories/cleanup', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log('Nameless categories cleaned up');
+      } catch (err) {
+        console.error('Error cleaning up nameless categories:', err);
+        setCategoryError('Не вдалося очистити безіменні категорії');
+      }
 
       // Fetch saved products with category IDs
       try {

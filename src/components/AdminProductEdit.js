@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import './AdminProductCreate.css';
+import './AdminProductEdit.css';
 
-function AdminProductCreate() {
+function AdminProductEdit() {
+  const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [stores, setStores] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
   const [formData, setFormData] = useState({
     category_id: '',
     brand_id: '',
     name: '',
     volume: '',
-    images: [null],
+    images: [{ type: 'new', file: null }],
     code: '',
     features: [{ key: '', value: '' }],
     description: '',
@@ -20,18 +23,40 @@ function AdminProductCreate() {
     usage: '',
     store_prices: [{ store_id: '', price: '', link: '' }],
   });
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const location = useLocation();
+
   useEffect(() => {
+    // Read productId from query parameter
+    const queryParams = new URLSearchParams(location.search);
+    const productIdFromQuery = queryParams.get('productId');
+    if (productIdFromQuery) {
+      setSelectedProductId(productIdFromQuery);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('https://price-ua-react-backend.onrender.com/products?limit=1000');
+        setProducts(response.data.products.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (err) {
+        console.error('Помилка завантаження товарів:', err);
+        setError('Не вдалося завантажити товари.');
+      }
+    };
+
     const fetchCategories = async () => {
       try {
         const response = await axios.get('https://price-ua-react-backend.onrender.com/categories/public');
         setCategories(response.data.sort((a, b) => a.name_ua.localeCompare(b.name_ua)));
       } catch (err) {
         console.error('Помилка завантаження категорій:', err);
+        setError('Не вдалося завантажити категорії.');
       }
     };
 
@@ -41,6 +66,7 @@ function AdminProductCreate() {
         setBrands(response.data.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err) {
         console.error('Помилка завантаження брендів:', err);
+        setError('Не вдалося завантажити бренди.');
       }
     };
 
@@ -50,21 +76,89 @@ function AdminProductCreate() {
         setStores(response.data.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err) {
         console.error('Помилка завантаження магазинів:', err);
+        setError('Не вдалося завантажити магазини.');
       }
     };
 
+    fetchProducts();
     fetchCategories();
     fetchBrands();
     fetchStores();
   }, []);
 
+  useEffect(() => {
+    if (selectedProductId) {
+      const fetchProductDetails = async () => {
+        try {
+          const response = await axios.get(`https://price-ua-react-backend.onrender.com/products/${selectedProductId}`);
+          const product = response.data;
+          const featuresArray = Object.entries(product.features || {}).map(([key, value]) => ({
+            key: key === 'hairType' ? 'type' : key,
+            value: value || '',
+          })).filter(f => f.key && f.value);
+          const images = product.images
+            .filter(url => url && !url.includes('placeholder.webp'))
+            .map(url => ({ type: 'existing', url }));
+          setFormData({
+            category_id: product.category_id ? product.category_id.toString() : '',
+            brand_id: product.brand_id ? product.brand_id.toString() : '',
+            name: product.name || '',
+            volume: product.volume || '',
+            images: images.length > 0 ? images : [{ type: 'new', file: null }],
+            code: product.code || '',
+            features: featuresArray.length > 0 ? featuresArray : [{ key: '', value: '' }],
+            description: product.description || '',
+            description_full: product.description_full || '',
+            composition: product.composition || '',
+            usage: product.usage || '',
+            store_prices: product.store_prices.length > 0 ? product.store_prices.map(sp => ({
+              store_id: sp.store_id.toString(),
+              price: sp.price.toString(),
+              link: sp.link || '',
+            })) : [{ store_id: '', price: '', link: '' }],
+          });
+          setPreviewImages(product.images.filter(url => url && !url.includes('placeholder.webp')));
+        } catch (err) {
+          console.error('Помилка завантаження деталей товару:', err);
+          setError('Не вдалося завантажити дані товару.');
+        }
+      };
+      fetchProductDetails();
+    } else {
+      setFormData({
+        category_id: '',
+        brand_id: '',
+        name: '',
+        volume: '',
+        images: [{ type: 'new', file: null }],
+        code: '',
+        features: [{ key: '', value: '' }],
+        description: '',
+        description_full: '',
+        composition: '',
+        usage: '',
+        store_prices: [{ store_id: '', price: '', link: '' }],
+      });
+      setPreviewImages([]);
+    }
+  }, [selectedProductId]);
+
   const handleInputChange = (e, index, field, type) => {
     const { name, value } = e.target;
     if (type === 'image') {
       const newImages = [...formData.images];
-      newImages[index] = e.target.files[0];
+      if (e.target.files[0]) {
+        newImages[index] = { type: 'new', file: e.target.files[0] };
+        const newPreviewImages = [...previewImages];
+        newPreviewImages[index] = URL.createObjectURL(e.target.files[0]);
+        setPreviewImages(newPreviewImages);
+      } else {
+        newImages[index] = { type: 'new', file: null };
+        const newPreviewImages = [...previewImages];
+        newPreviewImages[index] = null;
+        setPreviewImages(newPreviewImages);
+      }
       setFormData({ ...formData, images: newImages });
-      setPreviewImage(e.target.files[0]);
     } else if (type === 'feature') {
       const newFeatures = [...formData.features];
       newFeatures[index][field] = value;
@@ -80,7 +174,8 @@ function AdminProductCreate() {
 
   const addImageField = () => {
     if (formData.images.length < 10) {
-      setFormData({ ...formData, images: [...formData.images, null] });
+      setFormData({ ...formData, images: [...formData.images, { type: 'new', file: null }] });
+      setPreviewImages([...previewImages, null]);
     }
   };
 
@@ -101,11 +196,14 @@ function AdminProductCreate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedProductId) {
+      setError('Виберіть товар для редагування.');
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setSuccess(null);
 
-    // Validate required fields
     if (!formData.category_id || !formData.brand_id || !formData.name) {
       setError('Заповніть обов’язкові поля: категорія, бренд, назва');
       setIsLoading(false);
@@ -115,7 +213,6 @@ function AdminProductCreate() {
     const token = localStorage.getItem('token');
     const formDataToSend = new FormData();
 
-    // Append form data
     formDataToSend.append('category_id', formData.category_id);
     formDataToSend.append('brand_id', formData.brand_id);
     formDataToSend.append('name', formData.name);
@@ -139,41 +236,32 @@ function AdminProductCreate() {
     );
     formDataToSend.append('store_prices', JSON.stringify(validStorePrices));
 
-    formData.images.forEach((image) => {
-      if (image) {
-        formDataToSend.append('images', image);
+    const existingImages = formData.images
+      .filter(image => image.type === 'existing' && image.url && !image.url.includes('placeholder.webp'))
+      .map(image => image.url);
+    formDataToSend.append('existing_images', JSON.stringify(existingImages));
+
+    formData.images.forEach((image, index) => {
+      if (image.type === 'new' && image.file instanceof File) {
+        formDataToSend.append('images', image.file);
       }
     });
 
     try {
-      await axios.post('https://price-ua-react-backend.onrender.com/admin/product', formDataToSend, {
+      await axios.put(`https://price-ua-react-backend.onrender.com/admin/product/${selectedProductId}`, formDataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-      setSuccess('Товар успішно створено!');
-      setFormData({
-        category_id: '',
-        brand_id: '',
-        name: '',
-        volume: '',
-        images: [null],
-        code: '',
-        features: [{ key: '', value: '' }],
-        description: '',
-        description_full: '',
-        composition: '',
-        usage: '',
-        store_prices: [{ store_id: '', price: '', link: '' }],
-      });
-      setPreviewImage(null);
+      setSuccess('Товар успішно оновлено!');
+      setSelectedProductId('');
     } catch (err) {
-      console.error('Помилка створення товару:', {
+      console.error('Помилка оновлення товару:', {
         message: err.message,
         response: err.response ? err.response.data : 'No response data',
       });
-      setError(err.response?.data?.error || 'Не вдалося створити товар. Перевірте дані або підключення до сервера.');
+      setError(err.response?.data?.error || 'Не вдалося оновити товар. Перевірте дані або підключення до сервера.');
     } finally {
       setIsLoading(false);
     }
@@ -190,7 +278,6 @@ function AdminProductCreate() {
     { key: 'active_ingredients', label: 'Активні інгредієнти' },
   ];
 
-  // Filter available feature options based on selected features
   const getAvailableFeatureOptions = (currentIndex) => {
     const selectedKeys = formData.features
       .filter((_, index) => index !== currentIndex)
@@ -199,7 +286,6 @@ function AdminProductCreate() {
     return featureOptions.filter(option => !selectedKeys.includes(option.key));
   };
 
-  // Filter available store options based on selected stores
   const getAvailableStoreOptions = (currentIndex) => {
     const selectedStoreIds = formData.store_prices
       .filter((_, index) => index !== currentIndex)
@@ -209,11 +295,25 @@ function AdminProductCreate() {
   };
 
   return (
-    <div className="admin-product-create animate-page">
-      <h2>Створити новий товар</h2>
+    <div className="admin-product-edit animate-page">
+      <h2>Редагувати товар</h2>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       <form onSubmit={handleSubmit}>
+        <div className="form-group animate-field">
+          <label>Товар</label>
+          <select
+            value={selectedProductId}
+            onChange={(e) => setSelectedProductId(e.target.value)}
+          >
+            <option value="">Виберіть товар</option>
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name} (ID: {product.id})
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="form-group animate-field">
           <label>Категорія</label>
           <select
@@ -221,6 +321,7 @@ function AdminProductCreate() {
             value={formData.category_id}
             onChange={(e) => handleInputChange(e)}
             required
+            disabled={categories.length === 0}
           >
             <option value="">Виберіть категорію</option>
             {categories.map((category) => (
@@ -229,6 +330,7 @@ function AdminProductCreate() {
               </option>
             ))}
           </select>
+          {categories.length === 0 && <p>Завантаження категорій...</p>}
         </div>
         <div className="form-group animate-field">
           <label>Бренд</label>
@@ -237,6 +339,7 @@ function AdminProductCreate() {
             value={formData.brand_id}
             onChange={(e) => handleInputChange(e)}
             required
+            disabled={brands.length === 0}
           >
             <option value="">Виберіть бренд</option>
             {brands.map((brand) => (
@@ -245,6 +348,7 @@ function AdminProductCreate() {
               </option>
             ))}
           </select>
+          {brands.length === 0 && <p>Завантаження брендів...</p>}
         </div>
         <div className="form-group animate-field">
           <label>Назва</label>
@@ -271,14 +375,13 @@ function AdminProductCreate() {
                 </button>
               )}
             </div>
+            {previewImages[index] && (
+              <div className="image-preview">
+                <img src={previewImages[index]} alt={`Preview ${index + 1}`} />
+              </div>
+            )}
           </div>
         ))}
-        {previewImage && (
-          <div className="form-group animate-field image-preview">
-            <label>Вигляд зображення</label>
-            <img src={URL.createObjectURL(previewImage)} alt="Preview" />
-          </div>
-        )}
         <div className="form-group animate-field">
           <label>Об’єм</label>
           <input
@@ -396,11 +499,11 @@ function AdminProductCreate() {
           </div>
         ))}
         <button type="submit" className="save-button animate-field" disabled={isLoading}>
-          {isLoading ? 'Збереження...' : 'Зберегти'}
+          {isLoading ? 'Оновлення...' : 'Оновити товар'}
         </button>
       </form>
     </div>
   );
 }
 
-export default AdminProductCreate;
+export default AdminProductEdit;
