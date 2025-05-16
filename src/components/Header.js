@@ -60,16 +60,60 @@ function Header({ setSearchTerm }) {
   const resultsRef = useRef(null);
   const contextMenuRef = useRef(null);
 
+  // Load user from localStorage and validate token
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem('token');
+    
+    if (storedUser && token) {
+      // Validate token
+      const validateToken = async () => {
+        try {
+          console.log('Validating token in Header');
+          const response = await axios.get('https://price-ua-react-backend.onrender.com/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          console.log('Token valid, user data:', response.data);
+          setUser(JSON.parse(storedUser)); // Set user only if token is valid
+        } catch (err) {
+          console.error('Token validation failed in Header:', {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message,
+          });
+          if (
+            err.response?.status === 401 ||
+            err.response?.status === 403 ||
+            err.response?.data?.error?.toLowerCase().includes('недійсний токен') ||
+            err.response?.data?.error?.toLowerCase().includes('jwt expired')
+          ) {
+            console.log('Invalid or expired token, logging out');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          } else {
+            console.error('Unexpected error during token validation:', err);
+            // Optionally handle unexpected errors (e.g., network issues) by logging out
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          }
+        }
+      };
+
+      validateToken();
+    } else {
+      console.log('No user or token found in localStorage');
+      setUser(null);
     }
 
     const handleStorageChange = () => {
       const updatedUser = localStorage.getItem('user');
-      if (updatedUser) {
+      const updatedToken = localStorage.getItem('token');
+      if (updatedUser && updatedToken) {
         setUser(JSON.parse(updatedUser));
+      } else {
+        setUser(null);
       }
     };
 
@@ -177,6 +221,7 @@ function Header({ setSearchTerm }) {
   };
 
   const handleLogout = () => {
+    console.log('Logging out user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);

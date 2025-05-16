@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import CategoryList from './components/CategoryList';
 import CategorySubcategories from './components/CategorySubcategories';
@@ -29,22 +30,24 @@ function App() {
           <Header setSearchTerm={setSearchTerm} />
           <div className="content">
             <Routes>
+              <Route path="/login" element={<Login />} />
               <Route path="/" element={<CategoryList />} />
               <Route path="/subcategories/:groupId" element={<CategorySubcategories />} />
               <Route path="/category/:categoryId" element={<ProductList searchTerm={searchTerm} />} />
               <Route path="/product/:productId" element={<ProductDetail />} />
               <Route path="/search" element={<ProductList searchTerm={searchTerm} />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/admin/" element={<AdminDashboard />} />
-              <Route path="/admin/brand-create" element={<AdminBrandCreate />} />
-              <Route path="/admin/brand-edit" element={<AdminBrandEdit />} />
-              <Route path="/admin/store-create" element={<AdminStoreCreate />} />
-              <Route path="/admin/store-edit" element={<AdminStoreEdit />} />
-              <Route path="/admin/product-create" element={<AdminProductCreate />} />
-              <Route path="/admin/product-edit" element={<AdminProductEdit />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/account" element={<Account />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/admin/" element={<AdminDashboard />} />
+                <Route path="/admin/brand-create" element={<AdminBrandCreate />} />
+                <Route path="/admin/brand-edit" element={<AdminBrandEdit />} />
+                <Route path="/admin/store-create" element={<AdminStoreCreate />} />
+                <Route path="/admin/store-edit" element={<AdminStoreEdit />} />
+                <Route path="/admin/product-create" element={<AdminProductCreate />} />
+                <Route path="/admin/product-edit" element={<AdminProductEdit />} />
+              </Route>
             </Routes>
           </div>
         </div>
