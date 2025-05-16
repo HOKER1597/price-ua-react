@@ -11,19 +11,30 @@ function AdminDashboard() {
     const checkToken = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('No token found, redirecting to login');
         navigate('/login');
         return;
       }
 
       try {
-        // Make a test API call to verify token (e.g., fetch user profile or a protected endpoint)
+        // Make a test API call to verify token
         await axios.get('https://price-ua-react-backend.onrender.com/profile', {
           headers: { Authorization: `Bearer ${token}` },
         });
       } catch (err) {
         console.error('Error validating token:', err);
-        if (err.response?.status === 401 || err.response?.status === 403) {
+        // Check for 401/403 or specific JWT expiration error
+        if (
+          err.response?.status === 401 ||
+          err.response?.status === 403 ||
+          err.response?.data?.message?.toLowerCase().includes('jwt expired') ||
+          err.response?.data?.error?.toLowerCase().includes('jwt expired')
+        ) {
+          console.log('Invalid or expired token, redirecting to login');
+          localStorage.removeItem('token'); // Clear invalid token
           navigate('/login');
+        } else {
+          console.error('Unexpected error during token validation:', err);
         }
       }
     };
