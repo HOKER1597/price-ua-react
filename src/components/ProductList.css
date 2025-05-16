@@ -541,7 +541,7 @@
 
 .trash-icon {
   position: absolute;
-  top: 15px;
+  top: 5px;
   right: 5px;
   cursor: pointer;
   opacity: 0;
@@ -627,6 +627,7 @@
 }
 
 .delete-modal-buttons {
+  padding-top: 10px;
   display: flex;
   justify-content: center;
   gap: 10px;

@@ -712,8 +712,8 @@ function Wishlist() {
             />
             {categoryError && <div className="modal-error">{categoryError}</div>}
             <div className="modal-buttons">
-              <button className="add-btn" onClick={handleAddCategory}>Додати</button>
-              <button className="cancel-btn" onClick={closeModal}>Скасувати</button>
+              <button className="wishlist-modal-add-btn" onClick={handleAddCategory}>Додати</button>
+              <button className="wishlist-modal-cancel-btn" onClick={closeModal}>Скасувати</button>
             </div>
           </div>
         </div>
@@ -724,8 +724,8 @@ function Wishlist() {
             <p>Ви точно хочете видалити категорію?</p>
             {categoryError && <div className="modal-error">{categoryError}</div>}
             <div className="modal-buttons">
-              <button className="confirm-delete-btn" onClick={handleDeleteCategory}>Так</button>
-              <button className="cancel-btn" onClick={closeDeleteModal}>Ні</button>
+              <button className="wishlist-modal-confirm-delete-btn" onClick={handleDeleteCategory}>Так</button>
+              <button className="wishlist-modal-cancel-btn" onClick={closeDeleteModal}>Ні</button>
             </div>
           </div>
         </div>
@@ -736,9 +736,9 @@ function Wishlist() {
             <p>У цій категорії є товари, хочете їх зберегти?</p>
             {categoryError && <div className="modal-error">{categoryError}</div>}
             <div className="modal-buttons">
-              <button className="add-btn" onClick={handleDeleteCategorySaveProducts}>Так, зберегти</button>
-              <button className="delete-btn" onClick={handleDeleteCategoryDeleteProducts}>Ні, видалити</button>
-              <button className="cancel-btn" onClick={closeDeleteModal}>Назад</button>
+              <button className="wishlist-modal-add-btn" onClick={handleDeleteCategorySaveProducts}>Так, зберегти</button>
+              <button className="wishlist-modal-delete-btn" onClick={handleDeleteCategoryDeleteProducts}>Ні, видалити</button>
+              <button className="wishlist-modal-cancel-btn" onClick={closeDeleteModal}>Назад</button>
             </div>
           </div>
         </div>

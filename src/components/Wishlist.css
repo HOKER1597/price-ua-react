@@ -27,7 +27,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
   position: absolute;
   right: 0;
 }
@@ -228,7 +228,7 @@
 .modal-error {
   font-size: 14px;
   color: #ff0000;
-  margin-bottom: 10px;
+  margin: 10px;
   text-align: center;
 }
 
@@ -250,52 +250,49 @@
   text-align: center;
 }
 
-.add-btn,
-.cancel-btn,
-.delete-btn,
-.confirm-delete-btn {
+.wishlist-modal-add-btn,
+.wishlist-modal-cancel-btn,
+.wishlist-modal-delete-btn,
+.wishlist-modal-confirm-delete-btn {
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.2s;
+  color: #fff !important;
+  transition: background-color 0.2s ease;
 }
 
-.add-btn {
-  background-color: #28a745;
-  color: white;
+.wishlist-modal-add-btn {
+  background-color: #28a745 !important;
 }
 
-.add-btn:hover {
-  background-color: #218838;
+.wishlist-modal-add-btn:hover {
+  background-color: #218838 !important;
 }
 
-.confirm-delete-btn {
-  background-color: #d32f2f;
-  color: white;
+.wishlist-modal-cancel-btn {
+  background-color: #6c757d !important;
 }
 
-.confirm-delete-btn:hover {
-  background-color: #a62626;
+.wishlist-modal-cancel-btn:hover {
+  background-color: #5a6268 !important;
 }
 
-.delete-btn {
-  background-color: #d32f2f;
-  color: white;
+.wishlist-modal-delete-btn {
+  background-color: #d32f2f !important;
 }
 
-.delete-btn:hover {
-  background-color: #a62626;
+.wishlist-modal-delete-btn:hover {
+  background-color: #a62626 !important;
 }
 
-.cancel-btn {
-  background-color: #d3d3d3;
-  color: #333;
+.wishlist-modal-confirm-delete-btn {
+  background-color: #d32f2f !important;
 }
 
-.cancel-btn:hover {
-  background-color: #c0c0c0;
+.wishlist-modal-confirm-delete-btn:hover {
+  background-color: #a62626 !important;
 }
 
 /* Styles for wishlist heart icon to match ProductList */
